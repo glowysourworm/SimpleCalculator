@@ -15,10 +15,10 @@ namespace SimpleCalculator.Model
             this.SymbolTable = new SymbolTable();
 
             this.SymbolTable.Add(new Operator("=", 0, OperatorType.Assignment), new Expression("="));
-            this.SymbolTable.Add(new Operator("+", 1, OperatorType.Assignment), new Expression("+"));
-            this.SymbolTable.Add(new Operator("-", 2, OperatorType.Assignment), new Expression("-"));
-            this.SymbolTable.Add(new Operator("*", 3, OperatorType.Assignment), new Expression("*"));
-            this.SymbolTable.Add(new Operator("/", 4, OperatorType.Assignment), new Expression("/"));
+            this.SymbolTable.Add(new Operator("+", 1, OperatorType.Addition), new Expression("+"));
+            this.SymbolTable.Add(new Operator("-", 2, OperatorType.Subtraction), new Expression("-"));
+            this.SymbolTable.Add(new Operator("*", 3, OperatorType.Multiplication), new Expression("*"));
+            this.SymbolTable.Add(new Operator("/", 4, OperatorType.Division), new Expression("/"));
         }
     }
 }

@@ -9,6 +9,11 @@ namespace SimpleCalculator.Component.Interface
     public interface ICalculatorCore
     {
         /// <summary>
+        /// Formats math statement:  1) Removes white space, TBD... (Try regex's)
+        /// </summary>
+        string Format(string statement);
+
+        /// <summary>
         /// Validates raw math statement. Returns message about formatting if there is an error. Otherwise, 
         /// returns null.
         /// </summary>

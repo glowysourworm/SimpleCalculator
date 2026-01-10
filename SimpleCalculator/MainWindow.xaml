@@ -36,7 +36,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <TextBlock x:Name="InputDecorationTB" Text=">" FontSize="24" TextAlignment="Center" HorizontalAlignment="Center" />
-            <TextBox x:Name="InputTB" Grid.Column="1" VerticalContentAlignment="Center" FontSize="14" KeyUp="InputTB_KeyUp" />
+            <TextBox x:Name="InputTB" Grid.Column="1" VerticalContentAlignment="Center" FontSize="14" PreviewKeyDown="InputTB_PreviewKeyDown" />
         </Grid>
 
         <!-- Sidebar -->

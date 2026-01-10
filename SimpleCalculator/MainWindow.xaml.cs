@@ -7,13 +7,8 @@ using SimpleCalculator.Model;
 using SimpleCalculator.Model.Calculation;
 using SimpleCalculator.ViewModel;
 
-using MathExpression = SimpleCalculator.Model.MathExpression.Expression;
-
 namespace SimpleCalculator
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         private readonly CalculatorConfiguration _configuration;
@@ -40,14 +35,14 @@ namespace SimpleCalculator
             this.DataContext = _viewModel;
         }
 
-        private void InputTB_KeyUp(object sender, KeyEventArgs e)
+        private void InputTB_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                var codeLine = this.InputTB.Text;
-                var expression = new MathExpression(codeLine);
+                var statement = this.InputTB.Text;
+                var formattedStatement = _calculator.Format(statement);
 
-                var errorMessage = _calculator.Validate(codeLine);
+                var errorMessage = _calculator.Validate(formattedStatement);
 
                 if (errorMessage != null)
                 {
@@ -56,7 +51,7 @@ namespace SimpleCalculator
                 else
                 {
                     // Expand
-                    var semanticTree = _calculator.Expand(codeLine);
+                    var semanticTree = _calculator.Expand(formattedStatement);
 
                     // Evaluate
                     var result = _calculator.Evaluate(semanticTree);
@@ -65,14 +60,28 @@ namespace SimpleCalculator
                     if (result.Status != SemanticTreeResultStatus.Success)
                         _viewModel.AddCodeLine(result.Message, true);
 
+                    // Success!
                     else
                     {
-                        _viewModel.AddCodeLine(codeLine, false);
+                        _viewModel.AddCodeLine(formattedStatement, false);
                         _viewModel.AddCodeLine(FormatNumericResult(result), false, true);
-                    }
 
-                    this.InputTB.Text = string.Empty;
+                        // Save statement to recall using up / down arrows
+                        _viewModel.AddStatement(statement);
+
+                        // Clear input text
+                        this.InputTB.Text = string.Empty;
+                    }
                 }
+            }
+
+            else if (e.Key == Key.Up)
+            {
+                this.InputTB.Text = _viewModel.PreviousStatement() ?? this.InputTB.Text;
+            }
+            else if (e.Key == Key.Down)
+            {
+                this.InputTB.Text = _viewModel.NextStatement() ?? this.InputTB.Text;
             }
         }
 

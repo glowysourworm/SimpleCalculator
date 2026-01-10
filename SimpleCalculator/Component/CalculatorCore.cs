@@ -18,6 +18,11 @@ namespace SimpleCalculator.Component
             _expressionParser = expressionParser;
         }
 
+        public string Format(string statement)
+        {
+            return _expressionFormatter.PreFormat(statement);
+        }
+
         public string? Validate(string statement)
         {
             // Check raw format

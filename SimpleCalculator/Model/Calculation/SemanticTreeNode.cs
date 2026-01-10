@@ -41,11 +41,6 @@ namespace SimpleCalculator.Model.Calculation
 
         private bool Validate(SymbolTable symbolTable)
         {
-            if (this.LeftNode == null)
-                return false;
-
-            double result = 0;
-
             switch (this.Type)
             {
                 // Parses as a number
@@ -59,7 +54,7 @@ namespace SimpleCalculator.Model.Calculation
                     return this.Expression is ValueExpression && symbolTable.IsDefined(this.Expression.Raw);
 
                 case SemanticTreeNodeType.Expression:
-                    return this.RightNode != null && this.Operator != null;
+                    return this.LeftNode != null && this.RightNode != null && this.Operator != null;
                 default:
                     throw new Exception("Unhandled ISemanticTreeNode type");
             }
