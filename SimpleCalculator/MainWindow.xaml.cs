@@ -14,12 +14,14 @@ namespace SimpleCalculator
         private readonly CalculatorConfiguration _configuration;
         private readonly MainViewModel _viewModel;
         private readonly ICalculatorCore _calculator;
+        private readonly ICalculatorLogger _logger;
 
         public MainWindow()
         {
             _configuration = new CalculatorConfiguration();
             _viewModel = new MainViewModel();
-            _calculator = new CalculatorCore(_configuration, new ExpressionParser(_configuration), new ExpressionFormatter(_configuration));
+            _logger = new CalculatorLogger(LogMessage);
+            _calculator = new CalculatorCore(_configuration, _logger, new ExpressionParser(_configuration, _logger), new ExpressionFormatter(_configuration));
 
             InitializeComponent();
 
@@ -35,6 +37,11 @@ namespace SimpleCalculator
             this.DataContext = _viewModel;
         }
 
+        private void LogMessage(string message, bool isError)
+        {
+            _viewModel.AddCodeLine(message, isError, false);
+        }
+
         private void InputTB_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -42,29 +49,30 @@ namespace SimpleCalculator
                 var statement = this.InputTB.Text;
                 var formattedStatement = _calculator.Format(statement);
 
-                var errorMessage = _calculator.Validate(formattedStatement);
+                string? errorMessage = null;
+                var expression = _calculator.Validate(formattedStatement, out errorMessage);
 
                 if (errorMessage != null)
                 {
                     _viewModel.AddCodeLine(errorMessage, true);
                 }
+                else if (expression == null)
+                {
+                    _viewModel.AddCodeLine("Unknown error evaluating math expression", true);
+                }
                 else
                 {
-                    // Expand
-                    var semanticTree = _calculator.Expand(formattedStatement);
-
                     // Evaluate
-                    var result = _calculator.Evaluate(semanticTree);
+                    var result = _calculator.Evaluate(expression);
 
                     // Error
-                    if (result.Status != SemanticTreeResultStatus.Success)
-                        _viewModel.AddCodeLine(result.Message, true);
+                    if (result.ErrorMessage != null)
+                        _viewModel.AddCodeLine(result.ErrorMessage, true);
 
                     // Success!
                     else
                     {
-                        _viewModel.AddCodeLine(formattedStatement, false);
-                        _viewModel.AddCodeLine(FormatNumericResult(result), false, true);
+                        OutputSuccessResult(result, formattedStatement);
 
                         // Save statement to recall using up / down arrows
                         _viewModel.AddStatement(statement);
@@ -85,13 +93,41 @@ namespace SimpleCalculator
             }
         }
 
-        private string FormatNumericResult(SemanticTreeResult result)
+        private void OutputSuccessResult(MathExpressionResult result, string inputStatement)
         {
-            if (double.IsInteger(result.NumericResult))
-                return "= " + result.NumericResult.ToString("N0");
+            // Echo statement
+            _viewModel.AddCodeLine(inputStatement, false);
+
+            switch (result.OperationType)
+            {
+                // Output Value
+                case MathExpressionType.Number:
+                case MathExpressionType.Constant:
+                case MathExpressionType.Variable:
+                    _viewModel.AddCodeLine(FormatNumericResult(result.NumericResult), false, true);
+                    break;
+
+                case MathExpressionType.Arithmetic:
+                    _viewModel.AddCodeLine(FormatNumericResult(result.NumericResult), false, true);
+                    break;
+                case MathExpressionType.Assignment:
+                    _viewModel.AddCodeLine(FormatNumericResult(result.NumericResult), false, true);
+                    break;
+                case MathExpressionType.Function:
+                case MathExpressionType.Expression:
+                    break;
+                default:
+                    throw new Exception("Unhandled Math Expression Type");
+            }
+        }
+
+        private string FormatNumericResult(double number)
+        {
+            if (double.IsInteger(number))
+                return "= " + number.ToString("N0");
 
             else
-                return "= " + result.NumericResult.ToString();
+                return "= " + number.ToString();
         }
     }
 }

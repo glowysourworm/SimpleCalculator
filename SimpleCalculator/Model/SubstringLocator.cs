@@ -17,6 +17,19 @@
             this.Length = substring.Length;
         }
 
+        public SubstringLocator(string parent, char firstCharacter, bool inclusiveEndpoint = true)
+        {
+            var index = parent.IndexOf(firstCharacter);
+
+            if (index == -1 || (index == 0 && !inclusiveEndpoint))
+                throw new ArgumentException("Invalid substring locator");
+
+            _parentString = parent;
+
+            this.Index = inclusiveEndpoint ? index : index - 1;
+            this.Length = this.Index + 1;
+        }
+
         public SubstringLocator(string parent, int index, int length)
         {
             _parentString = parent;
@@ -35,6 +48,11 @@
         public bool ContainsIndex(int index)
         {
             return (index >= this.Index) && (index < this.Index + this.Length);
+        }
+
+        public override string ToString()
+        {
+            return GetSubString();
         }
     }
 }

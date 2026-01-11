@@ -1,5 +1,4 @@
 ﻿using SimpleCalculator.Component;
-using SimpleCalculator.Model.MathExpression;
 
 namespace SimpleCalculator.Model
 {
@@ -9,16 +8,23 @@ namespace SimpleCalculator.Model
 
         public const char LeftParenthesis = '(';
         public const char RightParenthesis = ')';
+        public const char FunctionVariableSeparator = ',';
 
         public CalculatorConfiguration()
         {
             this.SymbolTable = new SymbolTable();
 
-            this.SymbolTable.Add(new Operator("=", 0, OperatorType.Assignment), new Expression("="));
-            this.SymbolTable.Add(new Operator("+", 1, OperatorType.Addition), new Expression("+"));
-            this.SymbolTable.Add(new Operator("-", 2, OperatorType.Subtraction), new Expression("-"));
-            this.SymbolTable.Add(new Operator("*", 3, OperatorType.Multiplication), new Expression("*"));
-            this.SymbolTable.Add(new Operator("/", 4, OperatorType.Division), new Expression("/"));
+            var assignment = new Operator("=", 0, OperatorType.Assignment);
+            var addition = new Operator("+", 1, OperatorType.Addition);
+            var subtraction = new Operator("-", 2, OperatorType.Subtraction);
+            var muiltiplication = new Operator("*", 3, OperatorType.Multiplication);
+            var division = new Operator("/", 4, OperatorType.Division);
+
+            this.SymbolTable.Add(assignment, assignment);
+            this.SymbolTable.Add(addition, addition);
+            this.SymbolTable.Add(subtraction, subtraction);
+            this.SymbolTable.Add(muiltiplication, muiltiplication);
+            this.SymbolTable.Add(division, division);
         }
     }
 }

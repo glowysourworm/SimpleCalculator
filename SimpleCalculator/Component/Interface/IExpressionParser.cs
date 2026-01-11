@@ -1,14 +1,13 @@
-﻿using SimpleCalculator.Model.Calculation;
+﻿using SimpleCalculator.Model;
 
 namespace SimpleCalculator.Component.Interface
 {
     public interface IExpressionParser
     {
         /// <summary>
-        /// Parses the statement into an Expression. All constants, variables, and functions must be valid and defined
-        /// before this will complete successfully. Please use the validation methiods here to be aware that the statement
-        /// is properly formatted.
+        /// Parses the statement into an Expression. The state of the MathExpression depends on the readiness
+        /// of all varialbes, functions, and constants in the expression.
         /// </summary>
-        SemanticTree Parse(string statement);
+        MathExpression? Parse(string statement, out string? message);
     }
 }

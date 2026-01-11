@@ -1,4 +1,5 @@
-﻿using SimpleCalculator.Model.Calculation;
+﻿using SimpleCalculator.Model;
+using SimpleCalculator.Model.Calculation;
 
 namespace SimpleCalculator.Component.Interface
 {
@@ -17,16 +18,11 @@ namespace SimpleCalculator.Component.Interface
         /// Validates raw math statement. Returns message about formatting if there is an error. Otherwise, 
         /// returns null.
         /// </summary>
-        string? Validate(string statement);
-
-        /// <summary>
-        /// Creates SemanticTree from expression
-        /// </summary>
-        SemanticTree Expand(string statement);
+        MathExpression? Validate(string statement, out string? message);
 
         /// <summary>
         /// Calculates the semantic tree and produces a result
         /// </summary>
-        SemanticTreeResult Evaluate(SemanticTree semanticTree);
+        MathExpressionResult Evaluate(MathExpression expression);
     }
 }

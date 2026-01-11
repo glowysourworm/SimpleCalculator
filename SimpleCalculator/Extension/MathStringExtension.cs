@@ -15,6 +15,20 @@ namespace SimpleCalculator.Extension
             return statement.Split(removes.ToArray(), StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         }
 
+        public static string RemoveAllOuterParens(this string statement)
+        {
+            if (string.IsNullOrWhiteSpace(statement))
+                throw new ArgumentException("Empty string. Cannot remove outer parens");
+
+            while (statement.StartsWith(CalculatorConfiguration.LeftParenthesis) &&
+                   statement.EndsWith(CalculatorConfiguration.RightParenthesis))
+            {
+                statement = statement.Substring(1, statement.Length - 2);
+            }
+
+            return statement;
+        }
+
         public static string SurroundByParens(this string statement)
         {
             return CalculatorConfiguration.LeftParenthesis + statement + CalculatorConfiguration.RightParenthesis;
