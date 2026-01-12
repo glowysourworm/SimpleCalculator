@@ -21,7 +21,19 @@
             </Style.Triggers>
 
         </Style>
-        
+
+        <Style x:Key="NoSelectItemContainerStyle" TargetType="ListViewItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Grid Background="{TemplateBinding Background}">
+                            <ContentPresenter />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </Window.Resources>
     
     <Grid>
@@ -36,17 +48,23 @@
         </Grid.RowDefinitions>
 
         <!-- Primary Notepad -->
-        <ItemsControl x:Name="NotepadLV"
-                  ItemsSource="{Binding OutputLog}">
-            <ItemsControl.ItemTemplate>
+        <ListView x:Name="NotepadLV"                  
+                  IsTabStop="False"
+                  ItemsSource="{Binding OutputLog}"
+                  ItemContainerStyle="{StaticResource NoSelectItemContainerStyle}">
+            <ListView.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel Orientation="Horizontal" Margin="2">
+                    <StackPanel Orientation="Horizontal" Margin="2" Background="{Binding Background}">
                         <TextBlock Text="> " Visibility="{Binding IsAnswer, Converter={StaticResource BoolInverseVisibilityCollapseConverter}}" />
-                        <TextBlock Text="{Binding Message}" />
+                        <TextBox Text="{Binding Message}" 
+                                 IsReadOnly="True" 
+                                 IsTabStop="False"
+                                 BorderThickness="0">
+                        </TextBox>
                     </StackPanel>
                 </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+            </ListView.ItemTemplate>
+        </ListView>
 
         <!-- Primary Input -->
         <Grid Grid.Row="1">
@@ -68,6 +86,9 @@
 
             <ListView x:Name="ConstantsLV" 
                       Grid.Row="1"
+                      IsTabStop="False"
+                      Focusable="False"                      
+                      ItemContainerStyle="{StaticResource NoSelectItemContainerStyle}"
                       ItemsSource="{Binding Constants}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
@@ -84,6 +105,9 @@
 
             <ListView x:Name="VariablesLV" 
                       Grid.Row="3"
+                      IsTabStop="False"
+                      Focusable="False"                      
+                      ItemContainerStyle="{StaticResource NoSelectItemContainerStyle}"
                       ItemsSource="{Binding Variables}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
@@ -100,6 +124,9 @@
 
             <ListView x:Name="FunctionsLV" 
                       Grid.Row="5"
+                      IsTabStop="False"
+                      Focusable="False"
+                      ItemContainerStyle="{StaticResource NoSelectItemContainerStyle}"
                       ItemsSource="{Binding Functions}">
                 <ListView.ItemTemplate>
                     <DataTemplate>

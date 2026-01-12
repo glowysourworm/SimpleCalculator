@@ -36,6 +36,9 @@ namespace SimpleCalculator
             _viewModel.UpdateSymbols(_configuration.SymbolTable);
 
             this.DataContext = _viewModel;
+
+            // Focus on Input...
+            this.InputTB.Focus();
         }
 
         private void LogMessage(string message, bool isError)
