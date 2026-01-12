@@ -4,7 +4,26 @@
         FontSize="14"
         FontFamily="Consolas"
         WindowStartupLocation="CenterScreen"
-        Title="Simple Calculator">
+        Title="Simple Calculator"
+        Foreground="{Binding Theme.PrimaryForegroundColor}"
+        Background="{Binding Theme.PrimaryBackgroundColor}">
+
+    <Window.Resources>
+        
+        <!-- Theme -->
+        <Style x:Key="CodeTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{Binding Theme.CodeForegroundColor}" />
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsError}" Value="True">
+                    <Setter Property="Foreground" Value="{Binding Theme.CodeErrorForegroundColor}" />
+                </DataTrigger>
+            </Style.Triggers>
+
+        </Style>
+        
+    </Window.Resources>
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -17,17 +36,17 @@
         </Grid.RowDefinitions>
 
         <!-- Primary Notepad -->
-        <ListView x:Name="NotepadLV"
+        <ItemsControl x:Name="NotepadLV"
                   ItemsSource="{Binding OutputLog}">
-            <ListView.ItemTemplate>
+            <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal" Margin="2">
                         <TextBlock Text="> " Visibility="{Binding IsAnswer, Converter={StaticResource BoolInverseVisibilityCollapseConverter}}" />
                         <TextBlock Text="{Binding Message}" />
                     </StackPanel>
                 </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
 
         <!-- Primary Input -->
         <Grid Grid.Row="1">
@@ -40,7 +59,7 @@
         </Grid>
 
         <!-- Sidebar -->
-        <Grid RowDefinitions="Auto, *, Auto, *" 
+        <Grid RowDefinitions="Auto, *, Auto, *, Auto, *" 
               MinWidth="300"
               Grid.Column="1" 
               Grid.RowSpan="3">
@@ -52,25 +71,39 @@
                       ItemsSource="{Binding Constants}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Grid ColumnDefinitions="Auto, *">
+                        <Grid ColumnDefinitions="Auto, Auto, *">
                             <TextBlock Text="{Binding Symbol}" />
-                            <TextBlock Text="{Binding Value}" Grid.Column="1" />
+                            <TextBlock Text="=" Grid.Column="1" />
+                            <TextBlock Text="{Binding Value}" Grid.Column="2" />
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
 
-            <TextBlock Text="Functions" Grid.Row="2" />
+            <TextBlock Text="Variables" Grid.Row="2" />
+
+            <ListView x:Name="VariablesLV" 
+                      Grid.Row="3"
+                      ItemsSource="{Binding Variables}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid ColumnDefinitions="Auto, Auto, *">
+                            <TextBlock Text="{Binding Symbol}" />
+                            <TextBlock Text="=" Grid.Column="1" />
+                            <TextBlock Text="{Binding Value}" Grid.Column="2" />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <TextBlock Text="Functions" Grid.Row="4" />
 
             <ListView x:Name="FunctionsLV" 
-                      Grid.Row="3"
+                      Grid.Row="5"
                       ItemsSource="{Binding Functions}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Grid ColumnDefinitions="Auto, *">
-                            <TextBlock Text="{Binding Symbol}" />
-                            <TextBlock Text="{Binding Expression}" Grid.Column="1" />
-                        </Grid>
+                        <TextBlock Text="{Binding Expression}" />
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>

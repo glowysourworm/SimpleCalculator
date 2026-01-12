@@ -21,6 +21,7 @@ namespace SimpleCalculator.ViewModel
         public ConstantViewModel()
         {
             this.Symbol = string.Empty;
+            this.Value = 0;
         }
     }
 }

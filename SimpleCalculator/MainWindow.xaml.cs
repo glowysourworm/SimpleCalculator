@@ -23,16 +23,17 @@ namespace SimpleCalculator
             _logger = new CalculatorLogger(LogMessage);
             _calculator = new CalculatorCore(_configuration, _logger, new ExpressionParser(_configuration, _logger), new ExpressionFormatter(_configuration));
 
+            // Theme
+            _viewModel.Theme.Update(_configuration.Theme);
+
+            // Theme -> Style Bindings
             InitializeComponent();
 
             // Welcome Messages
             _viewModel.AddCodeLine("Welcome to Simple Calculator!");
 
             // Configuration
-            foreach (var oper in _configuration.SymbolTable.Operators)
-            {
-                _viewModel.AddOperator(oper);
-            }
+            _viewModel.UpdateSymbols(_configuration.SymbolTable);
 
             this.DataContext = _viewModel;
         }
@@ -79,6 +80,9 @@ namespace SimpleCalculator
 
                         // Clear input text
                         this.InputTB.Text = string.Empty;
+
+                        // Update Symbols
+                        _viewModel.UpdateSymbols(_configuration.SymbolTable);
                     }
                 }
             }
@@ -102,18 +106,22 @@ namespace SimpleCalculator
             {
                 // Output Value
                 case MathExpressionType.Number:
+                    _viewModel.AddCodeLine(FormatNumericResult(result.NumericResult), false, true);
+                    break;
                 case MathExpressionType.Constant:
                 case MathExpressionType.Variable:
-                    _viewModel.AddCodeLine(FormatNumericResult(result.NumericResult), false, true);
+                    //_viewModel.AddCodeLine(FormatNumericResult(result.NumericResult), false, true);
                     break;
 
                 case MathExpressionType.Arithmetic:
                     _viewModel.AddCodeLine(FormatNumericResult(result.NumericResult), false, true);
                     break;
                 case MathExpressionType.Assignment:
-                    _viewModel.AddCodeLine(FormatNumericResult(result.NumericResult), false, true);
+                    //_viewModel.AddCodeLine(FormatNumericResult(result.NumericResult), false, true);
                     break;
                 case MathExpressionType.Function:
+                    _viewModel.AddCodeLine(FormatNumericResult(result.NumericResult), false, true);
+                    break;
                 case MathExpressionType.Expression:
                     break;
                 default:

@@ -4,17 +4,24 @@ namespace SimpleCalculator.ViewModel
 {
     public class VariableViewModel : ViewModelBase
     {
-        char _symbol;
+        string _symbol;
+        double _value;
 
-        public char Symbol
+        public string Symbol
         {
             get { return _symbol; }
             set { this.RaiseAndSetIfChanged(ref _symbol, value); }
         }
-
-        public VariableViewModel(char symbol)
+        public double Value
         {
-            this.Symbol = symbol;
+            get { return _value; }
+            set { this.RaiseAndSetIfChanged(ref _value, value); }
+        }
+
+        public VariableViewModel()
+        {
+            this.Symbol = string.Empty;
+            this.Value = 0;
         }
     }
 }
