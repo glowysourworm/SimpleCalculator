@@ -13,6 +13,8 @@ namespace SimpleCalculator.Component
         private readonly CalculatorConfiguration _configuration;
         private readonly ICalculatorLogger _calculatorLogger;
 
+        private const string NON_ALPHA_CHARACTER = "[^a-zA-Z]";
+
         public ExpressionParser(CalculatorConfiguration configuration, ICalculatorLogger calculatorLogger)
         {
             _configuration = configuration;
@@ -111,6 +113,11 @@ namespace SimpleCalculator.Component
                                                  StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
 
             // Validation
+            //
+            // 1) Format:  Alphabetical characters only, no white spaces, parens, or underscores
+            // 2) No existing symbols may exist
+            // 
+
             if (statementSplit.Length != 2 ||
                 string.IsNullOrWhiteSpace(statementSplit[0]) ||
                 string.IsNullOrWhiteSpace(statementSplit[1]))
@@ -119,10 +126,20 @@ namespace SimpleCalculator.Component
                 return null;
             }
 
-            // Symbol Assignment
-            if (_configuration.SymbolTable.IsDefined(statementSplit[0]))
+            // Validates both function, or bare symbol
+            if (!ValidateFunctionSymbol(statementSplit[0]))
             {
-                switch (_configuration.SymbolTable.GetSymbolType(statementSplit[0]))
+                message = "Improper symbol name (must use alphabetical characters only): " + statement;
+                return null;
+            }
+
+            var isDefined = _configuration.SymbolTable.IsDefined(statementSplit[0]);
+            var definedSymbolType = isDefined ? _configuration.SymbolTable.GetSymbolType(statementSplit[0]) : SymbolType.Constant;
+
+            // Symbol Assignment
+            if (isDefined)
+            {
+                switch (definedSymbolType)
                 {
                     case SymbolType.Constant:
                     {
@@ -210,6 +227,13 @@ namespace SimpleCalculator.Component
 
         private FunctionSignature? ParseFunctionSignature(string signature)
         {
+            // Validation
+            //
+            // 1) Cannot re-define symbol as variable (here)
+            // 2) Signature form must be "f", or "f(arguments...)", or "funcName(arguments...)" 
+            // 3) No recursion will be done for the argument list. These must be plain variables.
+            //
+
             // Matches:  f(x)  (1 time),  f(x  (0 times)
             //           f(xy) (1 time)
             //           f(x)g(y) (2 times)
@@ -240,6 +264,14 @@ namespace SimpleCalculator.Component
 
                 foreach (var variable in independentVariables)
                 {
+                    // Re-Definition
+                    if (_configuration.SymbolTable.IsDefined(variable.Symbol) &&
+                        _configuration.SymbolTable.GetSymbolType(variable.Symbol) != SymbolType.Variable)
+                    {
+                        _calculatorLogger.Log("Cannot re-define symbol:  " + variable.Symbol, true);
+                        return null;
+                    }
+
                     // CHECK RAW STRINGS - NOT JUST VARIABLES (could've been a constant or function)
                     if (!_configuration.SymbolTable.IsDefined(variable.Symbol))
                     {
@@ -297,14 +329,77 @@ namespace SimpleCalculator.Component
                 }
             }
 
-            // NEW SYMBOL (CONSTANT)
-            _calculatorLogger.Log("Defining Symbol:  " + expression, false);
+            // Validate (new) Symbol
+            if (ValidateSymbol(expression))
+            {
+                // NEW SYMBOL (CONSTANT)
+                _calculatorLogger.Log("Defining Symbol:  " + expression, false);
 
-            var newConstant = new Constant(expression);
+                var newConstant = new Constant(expression);
 
-            _configuration.SymbolTable.Add(newConstant, 0);
+                _configuration.SymbolTable.Add(newConstant, 0);
 
-            return new MathExpression(newConstant);
+                return new MathExpression(newConstant);
+            }
+            else
+            {
+                _calculatorLogger.Log("Improper symbol definition. Must use alphabetical characters only.", true);
+                return null;
+            }
+        }
+
+        private bool ValidateFunctionSymbol(string symbolExpression)
+        {
+            // Empty or Null
+            if (string.IsNullOrWhiteSpace(symbolExpression))
+                return false;
+
+            // White Space 
+            if (symbolExpression.Contains(" "))
+                return false;
+
+            var containsParens = symbolExpression.Contains(CalculatorConfiguration.LeftParenthesis) ||
+                                 symbolExpression.Contains(CalculatorConfiguration.RightParenthesis);
+
+            // Argument List
+            if (containsParens)
+            {
+                // Remove Argument List
+                var symbol = new SubstringLocator(symbolExpression, CalculatorConfiguration.LeftParenthesis, false);
+
+                // Non Alphabetical Character(s)
+                if (StringHelpers.RegexMatchIC(NON_ALPHA_CHARACTER, symbol.GetSubString()))
+                    return false;
+
+                return true;
+            }
+
+            // No Argument List
+            else
+            {
+                // Non Alphabetical Character(s)
+                if (StringHelpers.RegexMatchIC(NON_ALPHA_CHARACTER, symbolExpression))
+                    return false;
+
+                return true;
+            }
+        }
+
+        private bool ValidateSymbol(string symbol)
+        {
+            // Empty or Null
+            if (string.IsNullOrWhiteSpace(symbol))
+                return false;
+
+            // Non Alphabetical Character(s)
+            if (StringHelpers.RegexMatchIC(NON_ALPHA_CHARACTER, symbol))
+                return false;
+
+            // White Space 
+            if (symbol.Contains(" "))
+                return false;
+
+            return true;
         }
     }
 }

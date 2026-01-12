@@ -193,7 +193,7 @@ namespace SimpleCalculator.Component
                         result = leftResult.NumericResult / rightResult.NumericResult;
                     }
                     else
-                        message = "Divide by zero error";
+                        return new MathExpressionResult(MathExpressionType.Arithmetic, "Divide by zero error");
 
                     break;
                 default:
@@ -203,7 +203,7 @@ namespace SimpleCalculator.Component
             return new MathExpressionResult(result, MathExpressionType.Arithmetic);
         }
 
-        public MathExpressionResult EvaluateAsAssignmentExpression(MathExpression expression, out string? message)
+        private MathExpressionResult EvaluateAsAssignmentExpression(MathExpression expression, out string? message)
         {
             // No operator is currently used for assignment expressions. There was none needed after
             // parsing the MathExpression. The right operand was used as the body expression.
