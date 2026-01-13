@@ -1,6 +1,4 @@
-﻿using System.Text.RegularExpressions;
-
-using SimpleCalculator.Component.Interface;
+﻿using SimpleCalculator.Component.Interface;
 using SimpleCalculator.Extension;
 using SimpleCalculator.Model;
 
@@ -12,8 +10,6 @@ namespace SimpleCalculator.Component
     {
         private readonly CalculatorConfiguration _configuration;
         private readonly ICalculatorLogger _calculatorLogger;
-
-        private const string NON_ALPHA_CHARACTER = "[^a-zA-Z]";
 
         public ExpressionParser(CalculatorConfiguration configuration, ICalculatorLogger calculatorLogger)
         {
@@ -123,7 +119,7 @@ namespace SimpleCalculator.Component
             }
 
             // Validates both function, or bare symbol
-            if (!ValidateFunctionSymbol(statementSplit[0]))
+            if (!statementSplit[0].ValidateFunctionSymbol())
             {
                 _calculatorLogger.Log("Improper symbol name (must use alphabetical characters only): " + statement, CalculatorLogType.IllegalDeclaration);
                 return null;
@@ -178,8 +174,27 @@ namespace SimpleCalculator.Component
                             return new MathExpression(variable, variableExpression);
                     }
 
-                    case SymbolType.Function:       // Let this be done below
-                        break;
+                    case SymbolType.Function:
+                    {
+                        var function = _configuration.SymbolTable.Get(statementSplit[0]) as Function;
+
+                        // Recurse
+                        var bodyMessage = string.Empty;
+                        var bodyExpression = Parse(statementSplit[1]);
+
+                        // Function (as assignment expression)
+                        if (bodyExpression != null)
+                        {
+                            return new MathExpression(function, bodyExpression);
+                        }
+
+                        // Assignment Error
+                        else
+                        {
+                            _calculatorLogger.Log("Improper function body expression:  " + statementSplit[1], CalculatorLogType.ParseError);
+                            return null;
+                        }
+                    }
                     case SymbolType.Operator:
                     {
                         _calculatorLogger.Log("Cannot redefine operator:  " + statementSplit[0], CalculatorLogType.IllegalDeclaration);
@@ -189,97 +204,11 @@ namespace SimpleCalculator.Component
                         throw new Exception("Unhandled Symbol Type");
                 }
             }
-
-            // Function Signature Assignment
-            var signature = ParseFunctionSignature(statementSplit[0]);
-
-            if (signature == null)
-            {
-                _calculatorLogger.Log("Improperly formed function signature:  " + statementSplit[0], CalculatorLogType.ParseError);
-                return null;
-            }
-
-            // Recurse
-            var bodyMessage = string.Empty;
-            var bodyExpression = Parse(statementSplit[1]);
-
-            // Function (as assignment expression)
-            if (bodyExpression != null)
-            {
-                // Function (Symbol) will be assigned with the body expression also, which 
-                // will be stored in the symbol table on evaluation.
-                var function = new Function(signature, bodyExpression);
-
-                return new MathExpression(function, bodyExpression);
-            }
-
-            // Assignment Error
             else
             {
-                _calculatorLogger.Log("Improper function body expression:  " + statementSplit[1], CalculatorLogType.ParseError);
+                _calculatorLogger.Log("Undeclared Symbol", CalculatorLogType.SyntaxError);
                 return null;
             }
-        }
-
-        private FunctionSignature? ParseFunctionSignature(string signature)
-        {
-            // Validation
-            //
-            // 1) Cannot re-define symbol as variable (here)
-            // 2) Signature form must be "f", or "f(arguments...)", or "funcName(arguments...)" 
-            // 3) No recursion will be done for the argument list. These must be plain variables.
-            //
-
-            // Matches:  f(x)  (1 time),  f(x  (0 times)
-            //           f(xy) (1 time)
-            //           f(x)g(y) (2 times)
-            //           fine(xy) (1 time)
-            //           fine(x,y) (1 time)
-            //           fine(x,y,) (1 time)
-            //
-            var functionRegex = "[a-zA-Z]+\\([a-zA-Z|,]+\\)";
-
-            var match = Regex.Match(signature, functionRegex);
-
-            if (match.Success && match.Captures.Count == 1)
-            {
-                var symbol = new SubstringLocator(signature, CalculatorConfiguration.LeftParenthesis, false);
-
-                var variables = signature.Split(new string[] {
-                    symbol.GetSubString(),
-                    CalculatorConfiguration.LeftParenthesis.ToString(),
-                    CalculatorConfiguration.RightParenthesis.ToString(),
-                    CalculatorConfiguration.FunctionVariableSeparator.ToString() },
-                    StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-
-                if (variables.Length == 0)
-                    return null;
-
-                // NEW VARIABLE(S)
-                var independentVariables = variables.Select(x => new Variable(x)).ToArray();
-
-                foreach (var variable in independentVariables)
-                {
-                    // Re-Definition
-                    if (_configuration.SymbolTable.IsDefined(variable.Symbol) &&
-                        _configuration.SymbolTable.GetSymbolType(variable.Symbol) != SymbolType.Variable)
-                    {
-                        _calculatorLogger.Log("Cannot re-define symbol:  " + variable.Symbol, CalculatorLogType.IllegalDeclaration);
-                        return null;
-                    }
-
-                    // CHECK RAW STRINGS - NOT JUST VARIABLES (could've been a constant or function)
-                    if (!_configuration.SymbolTable.IsDefined(variable.Symbol))
-                    {
-                        _calculatorLogger.Log("Defining Variable:  " + variable.ToString(), CalculatorLogType.VariableDeclaration);
-                        _configuration.SymbolTable.Add(variable, 0);
-                    }
-                }
-
-                return new FunctionSignature(new Variable(symbol.GetSubString()), independentVariables);
-            }
-            else
-                return null;
         }
 
         private MathExpression? ParseValueExpression(string expression)
@@ -317,83 +246,15 @@ namespace SimpleCalculator.Component
             // Value Expression: Function (THESE MUST BE PRE-VALIDATED!)
             foreach (var function in _configuration.SymbolTable.Functions)
             {
+                // Body Expression is already parsed. So return this to evaluate the value expression.
                 if (function.Symbol == expression)
                 {
-                    return new MathExpression(function);
+                    return function.Body;
                 }
             }
 
-            // Validate (new) Symbol
-            if (ValidateSymbol(expression))
-            {
-                // NEW SYMBOL (CONSTANT)
-                _calculatorLogger.Log("Defining Symbol:  " + expression, CalculatorLogType.ConstantDeclaration);
-
-                var newConstant = new Constant(expression);
-
-                _configuration.SymbolTable.Add(newConstant, 0);
-
-                return new MathExpression(newConstant);
-            }
-            else
-            {
-                _calculatorLogger.Log("Improper symbol definition. Must use alphabetical characters only.", CalculatorLogType.ParseError);
-                return null;
-            }
-        }
-
-        private bool ValidateFunctionSymbol(string symbolExpression)
-        {
-            // Empty or Null
-            if (string.IsNullOrWhiteSpace(symbolExpression))
-                return false;
-
-            // White Space 
-            if (symbolExpression.Contains(" "))
-                return false;
-
-            var containsParens = symbolExpression.Contains(CalculatorConfiguration.LeftParenthesis) ||
-                                 symbolExpression.Contains(CalculatorConfiguration.RightParenthesis);
-
-            // Argument List
-            if (containsParens)
-            {
-                // Remove Argument List
-                var symbol = new SubstringLocator(symbolExpression, CalculatorConfiguration.LeftParenthesis, false);
-
-                // Non Alphabetical Character(s)
-                if (StringHelpers.RegexMatchIC(NON_ALPHA_CHARACTER, symbol.GetSubString()))
-                    return false;
-
-                return true;
-            }
-
-            // No Argument List
-            else
-            {
-                // Non Alphabetical Character(s)
-                if (StringHelpers.RegexMatchIC(NON_ALPHA_CHARACTER, symbolExpression))
-                    return false;
-
-                return true;
-            }
-        }
-
-        private bool ValidateSymbol(string symbol)
-        {
-            // Empty or Null
-            if (string.IsNullOrWhiteSpace(symbol))
-                return false;
-
-            // Non Alphabetical Character(s)
-            if (StringHelpers.RegexMatchIC(NON_ALPHA_CHARACTER, symbol))
-                return false;
-
-            // White Space 
-            if (symbol.Contains(" "))
-                return false;
-
-            return true;
+            _calculatorLogger.Log("Invalid syntax or undeclared symbol", CalculatorLogType.SyntaxError);
+            return null;
         }
     }
 }

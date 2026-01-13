@@ -2,7 +2,7 @@
 
 namespace SimpleCalculator.Component.Interface
 {
-    public delegate void CalculatorLogDelegate(string message, CalculatorLogType type);
+    public delegate void CalculatorLogDelegate(string message, CalculatorLogType type, params object[] parameters);
 
     public interface ICalculatorLogger
     {

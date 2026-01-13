@@ -1,8 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 
-using SimpleCalculator.Component.Interface;
-using SimpleCalculator.Model;
-
 using SimpleWpf.ViewModel;
 
 namespace SimpleCalculator.ViewModel
@@ -41,14 +38,6 @@ namespace SimpleCalculator.ViewModel
             this.IsValid = false;
             this.Constants = new ObservableCollection<ConstantViewModel>();
             this.Variables = new ObservableCollection<VariableViewModel>();
-        }
-
-        public static FunctionViewModel Create(CalculatorConfiguration configuration,
-                                               IExpressionParser parser,
-                                               IExpressionFormatter formatter,
-                                               string expression)
-        {
-            return new FunctionViewModel();
         }
     }
 }

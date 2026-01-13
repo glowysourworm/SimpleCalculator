@@ -1,5 +1,7 @@
 ﻿using SimpleCalculator.Model.Interface;
 
+using SimpleWpf.Extensions.Collection;
+
 namespace SimpleCalculator.Model
 {
     public class SymbolTable
@@ -66,6 +68,20 @@ namespace SimpleCalculator.Model
         public void Remove(Operator symbol)
         {
             _operators.Remove(symbol);
+        }
+        public void Remove(string symbol)
+        {
+            if (_constants.Any(x => x.Key.Symbol == symbol))
+                _constants.Remove(x => x.Key.Symbol == symbol);
+
+            if (_variables.Any(x => x.Key.Symbol == symbol))
+                _variables.Remove(x => x.Key.Symbol == symbol);
+
+            if (_functions.Any(x => x.Key.Symbol == symbol))
+                _functions.Remove(x => x.Key.Symbol == symbol);
+
+            if (_operators.Any(x => x.Key.Symbol == symbol))
+                _operators.Remove(x => x.Key.Symbol == symbol);
         }
 
         public Operator GetAssignmentOperator()

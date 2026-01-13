@@ -22,7 +22,26 @@ namespace SimpleCalculator.Component
             _logger = logger;
         }
 
-        public string Format(string statement)
+        public StatementType CalculateStatementType(string statement)
+        {
+            if (string.IsNullOrWhiteSpace(statement))
+                return StatementType.Invalid;
+
+            // There could be pieces of a math expression in here.
+            var statementParts = statement.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList();
+
+            // OperatorLed
+            if (_configuration.SymbolTable.Operators.Any(x => x.Symbol == statementParts[0]))
+                return StatementType.OperatorLed;
+
+            // Keyword
+            if (_configuration.Keywords.Any(x => x.Name == statementParts[0]))
+                return StatementType.Terminal;
+
+            return StatementType.Math;
+        }
+
+        public string FormatMathStatement(string statement)
         {
             return _expressionFormatter.PreFormat(statement);
         }
@@ -99,15 +118,14 @@ namespace SimpleCalculator.Component
                     return EvaluateAsArithmeticExpression(expression);
                 case MathExpressionType.Assignment:
                     return EvaluateAsAssignmentExpression(expression);
-                case MathExpressionType.Expression:     // Nothing to do                            
-                    break;
+                case MathExpressionType.Expression:                     // These are body expressions for functions
+                    return Evaluate(expression);
                 default:
                     throw new Exception("Unhandled MathExpressionType");
             }
-
-            return new MathExpressionResult(MathExpressionType.Expression, true);
         }
 
+        #region (private) Evaluation Methods
         private MathExpressionResult EvaluateAsValueExpression(MathExpression expression)
         {
             double number = 0;
@@ -115,7 +133,11 @@ namespace SimpleCalculator.Component
             if (expression.Type == MathExpressionType.Number)
             {
                 if (!double.TryParse(expression.Expression.ToString(), out number))
+                {
                     _logger.Log("Error trying to evaluate numeric symbol:  " + expression.Symbol?.ToString(), CalculatorLogType.ParseError);
+
+                    return new MathExpressionResult(expression, true, 0);
+                }
             }
 
             else if (expression.Type == MathExpressionType.Constant)
@@ -142,9 +164,8 @@ namespace SimpleCalculator.Component
             else
                 throw new Exception("Unhandled Value Expression Type");
 
-            return new MathExpressionResult(number);
+            return new MathExpressionResult(expression, false, number);
         }
-
         private MathExpressionResult EvaluateAsArithmeticExpression(MathExpression expression)
         {
             if (expression.LeftOperand == null ||
@@ -161,7 +182,7 @@ namespace SimpleCalculator.Component
 
             if (leftResult == null ||
                 rightResult == null)
-                return new MathExpressionResult(MathExpressionType.Arithmetic, true);
+                return new MathExpressionResult(expression, true, 0);
 
             switch (expression.Operator.Type)
             {
@@ -185,17 +206,19 @@ namespace SimpleCalculator.Component
                     {
                         _logger.Log(expression.Expression, CalculatorLogType.DivideByZero);
 
-                        return new MathExpressionResult(MathExpressionType.Arithmetic, true);
+                        return new MathExpressionResult(expression, true, 0);
                     }
 
+                    break;
+                case OperatorType.Modulo:
+                    result = leftResult.NumericResult % rightResult.NumericResult;
                     break;
                 default:
                     throw new Exception("Unhandled Arithmetic Operator Type");
             }
 
-            return new MathExpressionResult(result, MathExpressionType.Arithmetic);
+            return new MathExpressionResult(expression, false, result);
         }
-
         private MathExpressionResult EvaluateAsAssignmentExpression(MathExpression expression)
         {
             // No operator is currently used for assignment expressions. There was none needed after
@@ -212,7 +235,7 @@ namespace SimpleCalculator.Component
             {
                 _logger.Log("Unable to evaluate expression body", CalculatorLogType.ParseError);
 
-                return new MathExpressionResult(MathExpressionType.Assignment, true);
+                return new MathExpressionResult(expression, true, 0);
             }
 
             // Procedure
@@ -224,40 +247,36 @@ namespace SimpleCalculator.Component
             {
                 case SymbolType.Constant:
 
-                    // Show Expression
-                    _logger.Log(expression.ToString(), CalculatorLogType.ConstantDeclaration);
-
-                    // Define Constant
+                    // Set Constant
                     if (_configuration.SymbolTable.IsDefined(expression.Symbol))
                         _configuration.SymbolTable.SetValue(expression.Symbol as Constant, rightResult.NumericResult);
 
                     else
-                        _configuration.SymbolTable.Add(expression.Symbol as Constant, rightResult.NumericResult);
+                        throw new Exception("Trying to assign to undefined symbol:  ICalculatorCore");
 
                     break;
                 case SymbolType.Variable:
 
-                    // Show Expression
-                    _logger.Log(expression.ToString(), CalculatorLogType.VariableDeclaration);
-
-                    // Define Variable
+                    // Set Variable
                     if (_configuration.SymbolTable.IsDefined(expression.Symbol))
                         _configuration.SymbolTable.SetValue(expression.Symbol as Variable, rightResult.NumericResult);
 
                     else
-                        _configuration.SymbolTable.Add(expression.Symbol as Variable, rightResult.NumericResult);
+                        throw new Exception("Trying to assign to undefined symbol:  ICalculatorCore");
 
                     break;
                 case SymbolType.Function:
 
-                    // Show Expression
-                    _logger.Log(expression.ToString(), CalculatorLogType.FunctionDeclaration);
-
-                    // Define Variable
+                    // Set Function
                     if (_configuration.SymbolTable.IsDefined(expression.Symbol))
-                        _configuration.SymbolTable.SetValue(expression.Symbol as Function, expression.Symbol as Function);
+                    {
+                        var function = _configuration.SymbolTable.Get(expression.Symbol.Symbol) as Function;
+
+                        // Set body expression
+                        function.SetBody(expression.RightOperand);
+                    }
                     else
-                        _configuration.SymbolTable.Add(expression.Symbol as Function, expression.Symbol as Function);
+                        throw new Exception("Trying to assign to undefined symbol:  ICalculatorCore");
 
                     break;
                 case SymbolType.Operator:
@@ -267,7 +286,8 @@ namespace SimpleCalculator.Component
                     throw new Exception("Unhandled symbol type");
             }
 
-            return new MathExpressionResult(MathExpressionType.Assignment, false);
+            return new MathExpressionResult(expression, true, 0);
         }
+        #endregion
     }
 }

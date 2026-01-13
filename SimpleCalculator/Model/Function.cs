@@ -18,6 +18,11 @@ namespace SimpleCalculator.Model
             this.SymbolType = SymbolType.Function;
         }
 
+        public void SetBody(MathExpression bodyExpression)
+        {
+            this.Body = bodyExpression;
+        }
+
         public override bool Equals(object? obj)
         {
             return this.Symbol.Equals(((ISymbol)obj).Symbol);

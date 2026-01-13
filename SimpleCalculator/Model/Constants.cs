@@ -18,6 +18,29 @@
         Operator = 3
     }
 
+    public enum StatementType
+    {
+        /// <summary>
+        /// Statement type cannot be inferred by the ICalculatorCore
+        /// </summary>
+        Invalid = 0,
+
+        /// <summary>
+        /// Statement begins with an operator. The user wishes to operate on the previous result.
+        /// </summary>
+        OperatorLed = 1,
+
+        /// <summary>
+        /// Input is a math expression
+        /// </summary>
+        Math = 2,
+
+        /// <summary>
+        /// Input is a command or "terminal statement"
+        /// </summary>
+        Terminal = 3
+    }
+
     public enum KeywordType
     {
         /// <summary>
@@ -51,9 +74,9 @@
         Operator = 5,
 
         /// <summary>
-        /// Keyword for setting a symbol value
+        /// Keyword for declaring a symbol
         /// </summary>
-        Set = 6,
+        Declare = 6,
 
         /// <summary>
         /// Keyword for clearing a symbol

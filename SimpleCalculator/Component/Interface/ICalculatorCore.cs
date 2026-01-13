@@ -10,9 +10,14 @@ namespace SimpleCalculator.Component.Interface
     public interface ICalculatorCore
     {
         /// <summary>
+        /// Determines what type of statement is being input by the user
+        /// </summary>
+        StatementType CalculateStatementType(string statement);
+
+        /// <summary>
         /// Formats math statement:  1) Removes white space, TBD... (Try regex's)
         /// </summary>
-        string Format(string statement);
+        string FormatMathStatement(string statement);
 
         /// <summary>
         /// Validates raw math statement. Returns message about formatting if there is an error. Otherwise, 

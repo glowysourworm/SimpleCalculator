@@ -35,13 +35,13 @@
 
             this.Keywords.Add(new Keyword("help", KeywordType.Help, "Type help [topic] to display information about that topic, or \"help\" to list possible topics."));
             this.Keywords.Add(new Keyword("list", KeywordType.List, "Lists all currently declared symbols and their values:  constants, variables, functions, and operators"));
-            this.Keywords.Add(new Keyword("constant", KeywordType.Constant, "Declare or set a constant by typing \"set constant [name] = [value]\""));
-            this.Keywords.Add(new Keyword("variable", KeywordType.Variable, "Declare or set a variable by typing \"set variable [name] = [value]\""));
-            this.Keywords.Add(new Keyword("function", KeywordType.Function, "Declare or set a function by typing \"set function [name] = [value]\""));
+            this.Keywords.Add(new Keyword("constant", KeywordType.Constant, "Declare a constant by typing \"declare constant [name] = [value]\""));
+            this.Keywords.Add(new Keyword("variable", KeywordType.Variable, "Declare a variable by typing \"declare variable [name] = [value]\""));
+            this.Keywords.Add(new Keyword("function", KeywordType.Function, "Declare a function by typing \"declare function [name] = [value]\""));
             this.Keywords.Add(new Keyword("operator", KeywordType.Operator, "Operators cannot be reset or re-declared. Type \"list operator\" to show list of operators"));
-            this.Keywords.Add(new Keyword("set", KeywordType.Set, "Declare or set a symbol by typing \"set [constant | variable | function] [name] = [value]\""));
+            this.Keywords.Add(new Keyword("declare", KeywordType.Declare, "Declare a symbol by typing \"declare [constant | variable | function] [name]\""));
             this.Keywords.Add(new Keyword("clear", KeywordType.Clear, "Clear a symbol by typing \"clear [name] \""));
-            this.Keywords.Add(new Keyword("plot", KeywordType.Plot, "Plot a function by typing \"plot [function] [domain] \". The domain should be declared using set notation with each variable in order."));
+            this.Keywords.Add(new Keyword("plot", KeywordType.Plot, "Plot a function by typing \"plot [function] [domain] \"."));
 
             // Defaults
             AssignmentOperator = "=";
@@ -103,6 +103,11 @@
 
             AddFunctions();
             AddConstants();
+        }
+
+        public Keyword GetKeyword(string name)
+        {
+            return this.Keywords.FirstOrDefault(x => x.Name == name);
         }
 
         private void AddFunctions()

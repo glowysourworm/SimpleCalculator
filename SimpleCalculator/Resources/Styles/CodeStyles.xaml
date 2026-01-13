@@ -52,13 +52,13 @@
 
     <!-- Parse Error -->
     <Style x:Key="CodeParseErrorStyle" TargetType="ListViewItem" BasedOn="{StaticResource CodeNormalStyle}">
-        <Setter Property="Margin" Value="15, 5, 5, 5" />
+        <Setter Property="Margin" Value="15, 0,0,0" />
         <Setter Property="Foreground" Value="{Binding DataContext.Configuration.Theme.CodeErrorForegroundColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
     </Style>
 
     <!-- Syntax Error -->
     <Style x:Key="CodeSyntaxErrorStyle" TargetType="ListViewItem" BasedOn="{StaticResource CodeNormalStyle}">
-        <Setter Property="Margin" Value="15, 5, 5, 5" />
+        <Setter Property="Margin" Value="15, 0,0,0" />
         <Setter Property="Foreground" Value="{Binding DataContext.Configuration.Theme.CodeErrorForegroundColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
     </Style>
 
@@ -68,25 +68,25 @@
 
     <!-- Illegal Declaration -->
     <Style x:Key="CodeIllegalDeclarationStyle" TargetType="ListViewItem" BasedOn="{StaticResource CodeNormalStyle}">
-        <Setter Property="Margin" Value="15, 5, 5, 5" />
+        <Setter Property="Margin" Value="15, 0,0,0" />
         <Setter Property="Foreground" Value="{Binding DataContext.Configuration.Theme.CodeErrorForegroundColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
     </Style>
     
     <!-- Terminal -->
     <Style x:Key="CodeTerminalStyle" TargetType="ListViewItem" BasedOn="{StaticResource CodeNormalStyle}">
-        <Setter Property="Margin" Value="15, 5, 5, 5" />
+        <Setter Property="Margin" Value="15, 0,0,0" />
         <Setter Property="Foreground" Value="{Binding DataContext.Configuration.Theme.TerminalForegroundColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
         <Setter Property="FontSize" Value="{Binding DataContext.Configuration.Theme.TerminalFontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
     </Style>
     
     <!-- Result -->
     <Style x:Key="CodeResultStyle" TargetType="ListViewItem" BasedOn="{StaticResource CodeNormalStyle}">
-        <Setter Property="Margin" Value="15, 5, 5, 5" />
+        <Setter Property="Margin" Value="15, 0,0,0" />
     </Style>
 
     <!-- Result -->
     <Style x:Key="CodeDivideByZeroStyle" TargetType="ListViewItem" BasedOn="{StaticResource CodeNormalStyle}">
-        <Setter Property="Margin" Value="15, 5, 5, 5" />
+        <Setter Property="Margin" Value="15, 0,0,0" />
         <Setter Property="Foreground" Value="{Binding DataContext.Configuration.Theme.CodeErrorForegroundColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
     </Style>
 
