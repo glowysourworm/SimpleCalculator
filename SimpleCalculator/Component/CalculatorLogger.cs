@@ -1,27 +1,28 @@
 ﻿using SimpleCalculator.Component.Interface;
+using SimpleCalculator.Model;
 
 namespace SimpleCalculator.Component
 {
     public class CalculatorLogger : ICalculatorLogger
     {
-        Action<string, bool> _callback;
+        CalculatorLogDelegate _callback;
 
-        public CalculatorLogger(Action<string, bool> callback)
+        public CalculatorLogger(CalculatorLogDelegate callback)
         {
             _callback = callback;
         }
 
-        public void Log(string message, bool isError)
+        public void Log(string message, CalculatorLogType type)
         {
             if (_callback != null)
             {
-                _callback(message, isError);
+                _callback(message, type);
             }
             else
                 throw new Exception("Must register logger before using the callback");
         }
 
-        public void RegisterLogger(Action<string, bool> callback)
+        public void RegisterLogger(CalculatorLogDelegate callback)
         {
             _callback = callback;
         }

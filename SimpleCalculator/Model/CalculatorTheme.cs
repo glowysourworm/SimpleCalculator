@@ -8,6 +8,8 @@ namespace SimpleCalculator.Model
         public Color TitleBackgroundColor { get; set; }
         public Color CodeForegroundColor { get; set; }
         public Color CodeErrorForegroundColor { get; set; }
+        public Color TerminalForegroundColor { get; set; }
+        public double TerminalFontSize { get; set; }
         public Color PrimaryBackgroundColor { get; set; }
         public Color PrimaryForegroundColor { get; set; }
         public Color SecondaryBackgroundColor { get; set; }
@@ -19,6 +21,8 @@ namespace SimpleCalculator.Model
             this.TitleBackgroundColor = Color.FromArgb(0xFF, 0xCC, 0xCC, 0xCC);
             this.CodeForegroundColor = Color.FromArgb(0xFF, 0x55, 0x55, 0x55);
             this.CodeErrorForegroundColor = Colors.Red;
+            this.TerminalForegroundColor = Colors.DarkSlateBlue;
+            this.TerminalFontSize = 14;
             this.PrimaryBackgroundColor = Colors.White;
             this.PrimaryForegroundColor = Color.FromArgb(0xFF, 0x55, 0x55, 0x55);
             this.SecondaryBackgroundColor = Colors.White;

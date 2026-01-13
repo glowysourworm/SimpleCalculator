@@ -21,14 +21,12 @@ namespace SimpleCalculator.Component
             _calculatorLogger = calculatorLogger;
         }
 
-        public MathExpression? Parse(string statement, out string? message)
+        public MathExpression? Parse(string statement)
         {
-            message = null;
-
             // Validation
             if (string.IsNullOrWhiteSpace(statement))
             {
-                message = "Math statement may not be empty";
+                _calculatorLogger.Log("Math statement may not be empty", CalculatorLogType.ParseError);
                 return null;
             }
 
@@ -52,14 +50,14 @@ namespace SimpleCalculator.Component
 
             if (assignmentOperatorCount > 1)
             {
-                message = "Math statement may only have one assignment operator";
+                _calculatorLogger.Log("Math statement may only have one assignment operator", CalculatorLogType.ParseError);
                 return null;
             }
 
             // Assignment / Arithmetic (FunctionSignature = MathExpression)
             if (assignmentOperatorCount == 1)
             {
-                return ParseAssignment(statement, out message);
+                return ParseAssignment(statement);
             }
 
             // Arithmetic: Sub-Expressions (Recurse), store results and return
@@ -78,7 +76,7 @@ namespace SimpleCalculator.Component
                 if (nextOperator == null)
                 {
                     // Operand Node (Left)
-                    return ParseValueExpression(statement, out message);
+                    return ParseValueExpression(statement);
                 }
 
                 // Next Operator (Arithmetic Statement)
@@ -90,8 +88,8 @@ namespace SimpleCalculator.Component
                     var rightStatement = statement.Substring(operatorIndex + 1, statement.Length - operatorIndex - 1);
 
                     // -> ParseImpl (RECURSE)
-                    var leftExpression = Parse(leftStatement, out message);
-                    var rightExpression = Parse(rightStatement, out message);
+                    var leftExpression = Parse(leftStatement);
+                    var rightExpression = Parse(rightStatement);
 
                     // Success!
                     if (leftExpression != null && rightExpression != null)
@@ -104,10 +102,8 @@ namespace SimpleCalculator.Component
         }
 
         // Parses statement as an assignment statement. 
-        private MathExpression? ParseAssignment(string statement, out string? message)
+        private MathExpression? ParseAssignment(string statement)
         {
-            message = null;
-
             // LHS = RHS
             var statementSplit = statement.Split(_configuration.SymbolTable.GetAssignmentOperator().Symbol,
                                                  StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
@@ -122,14 +118,14 @@ namespace SimpleCalculator.Component
                 string.IsNullOrWhiteSpace(statementSplit[0]) ||
                 string.IsNullOrWhiteSpace(statementSplit[1]))
             {
-                message = "Improperly formed statement: " + statement;
+                _calculatorLogger.Log("Improperly formed statement: " + statement, CalculatorLogType.SyntaxError);
                 return null;
             }
 
             // Validates both function, or bare symbol
             if (!ValidateFunctionSymbol(statementSplit[0]))
             {
-                message = "Improper symbol name (must use alphabetical characters only): " + statement;
+                _calculatorLogger.Log("Improper symbol name (must use alphabetical characters only): " + statement, CalculatorLogType.IllegalDeclaration);
                 return null;
             }
 
@@ -147,14 +143,14 @@ namespace SimpleCalculator.Component
                         var constant = _configuration.SymbolTable.Get(statementSplit[0]) as Constant;
 
                         // Recurse
-                        var constantExpression = Parse(statementSplit[1], out message);
+                        var constantExpression = Parse(statementSplit[1]);
 
                         if (constantExpression == null)
                             return null;
 
                         else if (constantExpression.Type != MathExpressionType.Number)
                         {
-                            message = "Can only assign numeric values as constants";
+                            _calculatorLogger.Log("Can only assign numeric values as constants", CalculatorLogType.IllegalDeclaration);
                             return null;
                         }
                         else
@@ -167,14 +163,14 @@ namespace SimpleCalculator.Component
                         var variable = _configuration.SymbolTable.Get(statementSplit[0]) as Variable;
 
                         // Recurse
-                        var variableExpression = Parse(statementSplit[1], out message);
+                        var variableExpression = Parse(statementSplit[1]);
 
                         if (variableExpression == null)
                             return null;
 
                         else if (variableExpression.Type != MathExpressionType.Number)
                         {
-                            message = "Can only assign numeric values as constants";
+                            _calculatorLogger.Log("Can only assign numeric values as constants", CalculatorLogType.IllegalDeclaration);
                             return null;
                         }
 
@@ -186,7 +182,7 @@ namespace SimpleCalculator.Component
                         break;
                     case SymbolType.Operator:
                     {
-                        message = "Cannot redefine operator:  " + statementSplit[0];
+                        _calculatorLogger.Log("Cannot redefine operator:  " + statementSplit[0], CalculatorLogType.IllegalDeclaration);
                         return null;
                     }
                     default:
@@ -199,13 +195,13 @@ namespace SimpleCalculator.Component
 
             if (signature == null)
             {
-                message = "Improperly formed function signature:  " + statementSplit[0];
+                _calculatorLogger.Log("Improperly formed function signature:  " + statementSplit[0], CalculatorLogType.ParseError);
                 return null;
             }
 
             // Recurse
             var bodyMessage = string.Empty;
-            var bodyExpression = Parse(statementSplit[1], out bodyMessage);
+            var bodyExpression = Parse(statementSplit[1]);
 
             // Function (as assignment expression)
             if (bodyExpression != null)
@@ -220,7 +216,7 @@ namespace SimpleCalculator.Component
             // Assignment Error
             else
             {
-                message = "Improper function body expression:  " + statementSplit[1];
+                _calculatorLogger.Log("Improper function body expression:  " + statementSplit[1], CalculatorLogType.ParseError);
                 return null;
             }
         }
@@ -268,14 +264,14 @@ namespace SimpleCalculator.Component
                     if (_configuration.SymbolTable.IsDefined(variable.Symbol) &&
                         _configuration.SymbolTable.GetSymbolType(variable.Symbol) != SymbolType.Variable)
                     {
-                        _calculatorLogger.Log("Cannot re-define symbol:  " + variable.Symbol, true);
+                        _calculatorLogger.Log("Cannot re-define symbol:  " + variable.Symbol, CalculatorLogType.IllegalDeclaration);
                         return null;
                     }
 
                     // CHECK RAW STRINGS - NOT JUST VARIABLES (could've been a constant or function)
                     if (!_configuration.SymbolTable.IsDefined(variable.Symbol))
                     {
-                        _calculatorLogger.Log("Defining Variable:  " + variable.ToString(), false);
+                        _calculatorLogger.Log("Defining Variable:  " + variable.ToString(), CalculatorLogType.VariableDeclaration);
                         _configuration.SymbolTable.Add(variable, 0);
                     }
                 }
@@ -286,14 +282,12 @@ namespace SimpleCalculator.Component
                 return null;
         }
 
-        private MathExpression? ParseValueExpression(string expression, out string? message)
+        private MathExpression? ParseValueExpression(string expression)
         {
             // Procedure: If the expression is a number, then directly parse the number. Otherwise,
             //            it will be considered as a constant unless it is defined in the symbol 
             //            table.
             // 
-
-            message = null;
 
             // Value Expression:  Number
             double numericValue = 0;
@@ -333,7 +327,7 @@ namespace SimpleCalculator.Component
             if (ValidateSymbol(expression))
             {
                 // NEW SYMBOL (CONSTANT)
-                _calculatorLogger.Log("Defining Symbol:  " + expression, false);
+                _calculatorLogger.Log("Defining Symbol:  " + expression, CalculatorLogType.ConstantDeclaration);
 
                 var newConstant = new Constant(expression);
 
@@ -343,7 +337,7 @@ namespace SimpleCalculator.Component
             }
             else
             {
-                _calculatorLogger.Log("Improper symbol definition. Must use alphabetical characters only.", true);
+                _calculatorLogger.Log("Improper symbol definition. Must use alphabetical characters only.", CalculatorLogType.ParseError);
                 return null;
             }
         }

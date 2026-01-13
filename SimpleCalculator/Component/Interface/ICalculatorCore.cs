@@ -18,7 +18,7 @@ namespace SimpleCalculator.Component.Interface
         /// Validates raw math statement. Returns message about formatting if there is an error. Otherwise, 
         /// returns null.
         /// </summary>
-        MathExpression? Validate(string statement, out string? message);
+        MathExpression? Validate(string statement);
 
         /// <summary>
         /// Calculates the semantic tree and produces a result

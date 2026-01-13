@@ -1,6 +1,4 @@
-﻿using SimpleCalculator.Component;
-
-namespace SimpleCalculator.Model.Interface
+﻿namespace SimpleCalculator.Model.Interface
 {
     public interface ISymbol
     {

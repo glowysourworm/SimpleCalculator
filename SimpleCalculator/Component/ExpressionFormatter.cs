@@ -6,16 +6,20 @@ namespace SimpleCalculator.Component
     public class ExpressionFormatter : IExpressionFormatter
     {
         private readonly CalculatorConfiguration _configuration;
+        private readonly ICalculatorLogger _logger;
 
-        public ExpressionFormatter(CalculatorConfiguration configuration)
+        public ExpressionFormatter(CalculatorConfiguration configuration, ICalculatorLogger logger)
         {
             _configuration = configuration;
+            _logger = logger;
         }
 
-        public string? ValidatePreFormat(string statement)
+        public bool ValidatePreFormat(string statement)
         {
+            string? message = null;
+
             if (string.IsNullOrWhiteSpace(statement))
-                return "Invalid statement";
+                message = "Invalid statement";
 
             // Assignment Operator (should have validation for configuration)
             var assignmentOperator = _configuration.SymbolTable
@@ -23,15 +27,18 @@ namespace SimpleCalculator.Component
                                                    .FirstOrDefault(x => x.Type == OperatorType.Assignment);
 
             if (assignmentOperator == null)
-                return "Invalid configuration. Must define an assignment operator";
+                message = "Invalid configuration. Must define an assignment operator";
 
             if (string.IsNullOrWhiteSpace(statement))
-                return "Invalid expression. Must be a numeric, arithmetic, or function expression.";
+                message = "Invalid expression. Must be a numeric, arithmetic, or function expression.";
 
             if (statement.Count(x => x.ToString() == assignmentOperator.Symbol) > 1)
-                return "Invalid expression. Must contain up to one assignment operator.";
+                message = "Invalid expression. Must contain up to one assignment operator.";
 
-            return null;
+            if (message != null)
+                _logger.Log(message, CalculatorLogType.ParseError);
+
+            return message == null;
         }
 
         public string PreFormat(string statement)

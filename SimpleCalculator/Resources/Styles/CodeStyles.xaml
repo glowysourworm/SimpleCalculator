@@ -1,0 +1,93 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:model="clr-namespace:SimpleCalculator.Model">
+
+    <!-- Normal -->
+    <Style x:Key="CodeNormalStyle" TargetType="ListViewItem">
+
+        <Setter Property="Padding" Value="3" />
+        
+        <Setter Property="Foreground" Value="{Binding DataContext.Configuration.Theme.CodeForegroundColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
+        <Setter Property="Background" Value="{Binding DataContext.Configuration.Theme.PrimaryBackgroundColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListViewItem">
+                    <Grid Background="{TemplateBinding Background}" ColumnDefinitions="Auto, *">
+                        
+                        <!-- Item "Template" -->
+                        <TextBlock Text="> " 
+                                   Foreground="{TemplateBinding Foreground}">
+                            <TextBlock.Visibility>
+                                <MultiBinding Converter="{StaticResource BoolORVisibilityMultiConverter}">
+                                    <Binding Path="Type" 
+                                             Converter="{StaticResource ParameterEqualityBoolConverter}" 
+                                             ConverterParameter="{x:Static model:CalculatorLogType.Normal}" />
+                                    <Binding Path="Type" 
+                                             Converter="{StaticResource ParameterEqualityBoolConverter}" 
+                                             ConverterParameter="{x:Static model:CalculatorLogType.ConstantDeclaration}" />
+                                    <Binding Path="Type" 
+                                             Converter="{StaticResource ParameterEqualityBoolConverter}" 
+                                             ConverterParameter="{x:Static model:CalculatorLogType.VariableDeclaration}" />
+                                    <Binding Path="Type" 
+                                             Converter="{StaticResource ParameterEqualityBoolConverter}" 
+                                             ConverterParameter="{x:Static model:CalculatorLogType.FunctionDeclaration}" />
+                                </MultiBinding>
+                            </TextBlock.Visibility>
+                        </TextBlock>
+
+                        <TextBox Text="{Binding Message}" 
+                                 Foreground="{TemplateBinding Foreground}"
+                                 Grid.Column="1"
+                                 IsReadOnly="True" 
+                                 IsTabStop="False"
+                                 BorderThickness="0">
+                        </TextBox>
+                        
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Parse Error -->
+    <Style x:Key="CodeParseErrorStyle" TargetType="ListViewItem" BasedOn="{StaticResource CodeNormalStyle}">
+        <Setter Property="Margin" Value="15, 5, 5, 5" />
+        <Setter Property="Foreground" Value="{Binding DataContext.Configuration.Theme.CodeErrorForegroundColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
+    </Style>
+
+    <!-- Syntax Error -->
+    <Style x:Key="CodeSyntaxErrorStyle" TargetType="ListViewItem" BasedOn="{StaticResource CodeNormalStyle}">
+        <Setter Property="Margin" Value="15, 5, 5, 5" />
+        <Setter Property="Foreground" Value="{Binding DataContext.Configuration.Theme.CodeErrorForegroundColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
+    </Style>
+
+    <!-- Constant / Variable / Function Declaration -->
+    <Style x:Key="CodeDeclarationStyle" TargetType="ListViewItem" BasedOn="{StaticResource CodeNormalStyle}">
+    </Style>
+
+    <!-- Illegal Declaration -->
+    <Style x:Key="CodeIllegalDeclarationStyle" TargetType="ListViewItem" BasedOn="{StaticResource CodeNormalStyle}">
+        <Setter Property="Margin" Value="15, 5, 5, 5" />
+        <Setter Property="Foreground" Value="{Binding DataContext.Configuration.Theme.CodeErrorForegroundColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
+    </Style>
+    
+    <!-- Terminal -->
+    <Style x:Key="CodeTerminalStyle" TargetType="ListViewItem" BasedOn="{StaticResource CodeNormalStyle}">
+        <Setter Property="Margin" Value="15, 5, 5, 5" />
+        <Setter Property="Foreground" Value="{Binding DataContext.Configuration.Theme.TerminalForegroundColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
+        <Setter Property="FontSize" Value="{Binding DataContext.Configuration.Theme.TerminalFontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
+    </Style>
+    
+    <!-- Result -->
+    <Style x:Key="CodeResultStyle" TargetType="ListViewItem" BasedOn="{StaticResource CodeNormalStyle}">
+        <Setter Property="Margin" Value="15, 5, 5, 5" />
+    </Style>
+
+    <!-- Result -->
+    <Style x:Key="CodeDivideByZeroStyle" TargetType="ListViewItem" BasedOn="{StaticResource CodeNormalStyle}">
+        <Setter Property="Margin" Value="15, 5, 5, 5" />
+        <Setter Property="Foreground" Value="{Binding DataContext.Configuration.Theme.CodeErrorForegroundColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
+    </Style>
+
+</ResourceDictionary>

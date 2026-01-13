@@ -9,7 +9,7 @@
         /// Checks validity of input characters, and format of input characters. This happens before 
         /// parsing and syntax checking.
         /// </summary>
-        string? ValidatePreFormat(string statement);
+        bool ValidatePreFormat(string statement);
 
         /// <summary>
         /// Prepares statement for parsing:  removes white space; ...

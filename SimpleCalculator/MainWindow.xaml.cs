@@ -21,8 +21,8 @@ namespace SimpleCalculator
         {
             _configuration = new CalculatorConfiguration();
             _viewModel = new MainViewModel();
-            _logger = new CalculatorLogger(LogMessage);
-            _calculator = new CalculatorCore(_configuration, _logger, new ExpressionParser(_configuration, _logger), new ExpressionFormatter(_configuration));
+            _logger = new CalculatorLogger(Output);
+            _calculator = new CalculatorCore(_configuration, _logger, new ExpressionParser(_configuration, _logger), new ExpressionFormatter(_configuration, _logger));
 
             // Theme
             _viewModel.Configuration.Theme.Update(_configuration.Theme);
@@ -31,7 +31,8 @@ namespace SimpleCalculator
             InitializeComponent();
 
             // Welcome Messages
-            _viewModel.AddCodeLine("Welcome to Simple Calculator!");
+            Output("Welcome to Simple Calculator!", CalculatorLogType.Normal);
+            Output("Type \"help\" to display help menu", CalculatorLogType.Terminal);
 
             // Configuration
             _viewModel.UpdateSymbols(_configuration.SymbolTable);
@@ -42,9 +43,9 @@ namespace SimpleCalculator
             this.InputTB.Focus();
         }
 
-        private void LogMessage(string message, bool isError)
+        private void Output(string message, CalculatorLogType type)
         {
-            _viewModel.AddCodeLine(message, isError, false);
+            _viewModel.AddCodeLine(message, type);
         }
 
         private void InputTB_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -54,28 +55,16 @@ namespace SimpleCalculator
                 var statement = this.InputTB.Text;
                 var formattedStatement = _calculator.Format(statement);
 
-                string? errorMessage = null;
-                var expression = _calculator.Validate(formattedStatement, out errorMessage);
+                // -> (Logger)
+                var expression = _calculator.Validate(formattedStatement);
 
-                if (errorMessage != null)
+                if (expression != null)
                 {
-                    _viewModel.AddCodeLine(errorMessage, true);
-                }
-                else if (expression == null)
-                {
-                    _viewModel.AddCodeLine("Unknown error evaluating math expression", true);
-                }
-                else
-                {
-                    // Evaluate
+                    // Evaluate (Logger) (Error messages will be logged in this call stack)
                     var result = _calculator.Evaluate(expression);
 
-                    // Error
-                    if (result.ErrorMessage != null)
-                        _viewModel.AddCodeLine(result.ErrorMessage, true);
-
                     // Success!
-                    else
+                    if (result != null)
                     {
                         OutputSuccessResult(result, formattedStatement);
 
@@ -104,13 +93,13 @@ namespace SimpleCalculator
         private void OutputSuccessResult(MathExpressionResult result, string inputStatement)
         {
             // Echo statement
-            _viewModel.AddCodeLine(inputStatement, false);
+            Output(inputStatement, CalculatorLogType.Normal);
 
             switch (result.OperationType)
             {
                 // Output Value
                 case MathExpressionType.Number:
-                    _viewModel.AddCodeLine(FormatNumericResult(result.NumericResult), false, true);
+                    Output(FormatNumericResult(result.NumericResult), CalculatorLogType.Result);
                     break;
                 case MathExpressionType.Constant:
                 case MathExpressionType.Variable:
@@ -118,13 +107,13 @@ namespace SimpleCalculator
                     break;
 
                 case MathExpressionType.Arithmetic:
-                    _viewModel.AddCodeLine(FormatNumericResult(result.NumericResult), false, true);
+                    Output(FormatNumericResult(result.NumericResult), CalculatorLogType.Result);
                     break;
                 case MathExpressionType.Assignment:
                     //_viewModel.AddCodeLine(FormatNumericResult(result.NumericResult), false, true);
                     break;
                 case MathExpressionType.Function:
-                    _viewModel.AddCodeLine(FormatNumericResult(result.NumericResult), false, true);
+                    Output(FormatNumericResult(result.NumericResult), CalculatorLogType.Result);
                     break;
                 case MathExpressionType.Expression:
                     break;

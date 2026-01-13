@@ -1,4 +1,4 @@
-﻿using SimpleCalculator.Component;
+﻿using SimpleCalculator.Model;
 
 using SimpleWpf.ViewModel;
 

@@ -27,7 +27,7 @@ namespace SimpleCalculator.Component
             return _expressionFormatter.PreFormat(statement);
         }
 
-        public MathExpression? Validate(string statement, out string? message)
+        public MathExpression? Validate(string statement)
         {
             // Procedure
             //
@@ -37,13 +37,11 @@ namespace SimpleCalculator.Component
             //
 
             // Check raw format
-            message = _expressionFormatter.ValidatePreFormat(statement);
-
-            if (message != null)
+            if (!_expressionFormatter.ValidatePreFormat(statement))
                 return null;
 
             // Parse Expression
-            var expression = _expressionParser.Parse(statement, out message);
+            var expression = _expressionParser.Parse(statement);
 
             if (expression == null)
                 return null;
@@ -65,7 +63,7 @@ namespace SimpleCalculator.Component
                             // Check Definition
                             if (!_configuration.SymbolTable.IsDefined(recurseExpression.Symbol))
                             {
-                                message = "Undefined symbol: " + recurseExpression.Symbol.ToString();
+                                _logger.Log("Undefined symbol: " + recurseExpression.Symbol.ToString(), CalculatorLogType.ParseError);
                                 return null;
                             }
                             break;
@@ -89,39 +87,35 @@ namespace SimpleCalculator.Component
 
         public MathExpressionResult Evaluate(MathExpression expression)
         {
-            string? message = null;
-            double numericResult = 0;
-
             switch (expression.Type)
             {
                 case MathExpressionType.Number:
                 case MathExpressionType.Constant:
                 case MathExpressionType.Variable:
                 case MathExpressionType.Function:
-                    return EvaluateAsValueExpression(expression, out message);
+                    return EvaluateAsValueExpression(expression);
 
                 case MathExpressionType.Arithmetic:
-                    return EvaluateAsArithmeticExpression(expression, out message);
+                    return EvaluateAsArithmeticExpression(expression);
                 case MathExpressionType.Assignment:
-                    return EvaluateAsAssignmentExpression(expression, out message);
+                    return EvaluateAsAssignmentExpression(expression);
                 case MathExpressionType.Expression:     // Nothing to do                            
                     break;
                 default:
                     throw new Exception("Unhandled MathExpressionType");
             }
 
-            return new MathExpressionResult(MathExpressionType.Expression, "Unknown statement");
+            return new MathExpressionResult(MathExpressionType.Expression, true);
         }
 
-        private MathExpressionResult EvaluateAsValueExpression(MathExpression expression, out string? message)
+        private MathExpressionResult EvaluateAsValueExpression(MathExpression expression)
         {
-            message = null;
             double number = 0;
 
             if (expression.Type == MathExpressionType.Number)
             {
                 if (!double.TryParse(expression.Expression.ToString(), out number))
-                    message = "Error trying to evaluate numeric symbol:  " + expression.Symbol?.ToString();
+                    _logger.Log("Error trying to evaluate numeric symbol:  " + expression.Symbol?.ToString(), CalculatorLogType.ParseError);
             }
 
             else if (expression.Type == MathExpressionType.Constant)
@@ -143,10 +137,7 @@ namespace SimpleCalculator.Component
                 var bodyExpression = new MathExpression(function.Body.Expression);
 
                 // Recurse!
-                var recursiveEvaluation = Evaluate(bodyExpression);
-
-                message = recursiveEvaluation.ErrorMessage;
-                number = recursiveEvaluation.NumericResult;
+                return Evaluate(bodyExpression);
             }
             else
                 throw new Exception("Unhandled Value Expression Type");
@@ -154,7 +145,7 @@ namespace SimpleCalculator.Component
             return new MathExpressionResult(number);
         }
 
-        private MathExpressionResult EvaluateAsArithmeticExpression(MathExpression expression, out string? message)
+        private MathExpressionResult EvaluateAsArithmeticExpression(MathExpression expression)
         {
             if (expression.LeftOperand == null ||
                 expression.RightOperand == null ||
@@ -168,11 +159,9 @@ namespace SimpleCalculator.Component
             var result = 0.0D;
             var divideByZero = false;
 
-            message = leftResult?.ErrorMessage ?? rightResult?.ErrorMessage ?? null;
-
             if (leftResult == null ||
                 rightResult == null)
-                return new MathExpressionResult(MathExpressionType.Arithmetic, "Unknown evaluation error");
+                return new MathExpressionResult(MathExpressionType.Arithmetic, true);
 
             switch (expression.Operator.Type)
             {
@@ -193,7 +182,11 @@ namespace SimpleCalculator.Component
                         result = leftResult.NumericResult / rightResult.NumericResult;
                     }
                     else
-                        return new MathExpressionResult(MathExpressionType.Arithmetic, "Divide by zero error");
+                    {
+                        _logger.Log(expression.Expression, CalculatorLogType.DivideByZero);
+
+                        return new MathExpressionResult(MathExpressionType.Arithmetic, true);
+                    }
 
                     break;
                 default:
@@ -203,7 +196,7 @@ namespace SimpleCalculator.Component
             return new MathExpressionResult(result, MathExpressionType.Arithmetic);
         }
 
-        private MathExpressionResult EvaluateAsAssignmentExpression(MathExpression expression, out string? message)
+        private MathExpressionResult EvaluateAsAssignmentExpression(MathExpression expression)
         {
             // No operator is currently used for assignment expressions. There was none needed after
             // parsing the MathExpression. The right operand was used as the body expression.
@@ -215,10 +208,12 @@ namespace SimpleCalculator.Component
             // Evaluate the right operand - which will become the function value (and expression)
             var rightResult = Evaluate(expression.RightOperand);
 
-            message = rightResult?.ErrorMessage ?? null;
-
             if (rightResult == null)
-                return new MathExpressionResult(MathExpressionType.Assignment, "Unable to evaluate expression body");
+            {
+                _logger.Log("Unable to evaluate expression body", CalculatorLogType.ParseError);
+
+                return new MathExpressionResult(MathExpressionType.Assignment, true);
+            }
 
             // Procedure
             //
@@ -230,7 +225,7 @@ namespace SimpleCalculator.Component
                 case SymbolType.Constant:
 
                     // Show Expression
-                    _logger.Log("Defining Constant:  " + expression.ToString(), false);
+                    _logger.Log(expression.ToString(), CalculatorLogType.ConstantDeclaration);
 
                     // Define Constant
                     if (_configuration.SymbolTable.IsDefined(expression.Symbol))
@@ -243,7 +238,7 @@ namespace SimpleCalculator.Component
                 case SymbolType.Variable:
 
                     // Show Expression
-                    _logger.Log("Defining Variable:  " + expression.ToString(), false);
+                    _logger.Log(expression.ToString(), CalculatorLogType.VariableDeclaration);
 
                     // Define Variable
                     if (_configuration.SymbolTable.IsDefined(expression.Symbol))
@@ -256,7 +251,7 @@ namespace SimpleCalculator.Component
                 case SymbolType.Function:
 
                     // Show Expression
-                    _logger.Log("Defining Function:  " + expression.ToString(), false);
+                    _logger.Log(expression.ToString(), CalculatorLogType.FunctionDeclaration);
 
                     // Define Variable
                     if (_configuration.SymbolTable.IsDefined(expression.Symbol))
@@ -266,13 +261,13 @@ namespace SimpleCalculator.Component
 
                     break;
                 case SymbolType.Operator:
-                    _logger.Log("Cannot Re-define Operator:  " + expression.Symbol, true);
+                    _logger.Log("Cannot redefine operator:  " + expression.Symbol, CalculatorLogType.IllegalDeclaration);
                     break;
                 default:
                     throw new Exception("Unhandled symbol type");
             }
 
-            return new MathExpressionResult(MathExpressionType.Assignment, null);
+            return new MathExpressionResult(MathExpressionType.Assignment, false);
         }
     }
 }

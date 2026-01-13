@@ -10,7 +10,7 @@ namespace SimpleCalculator.ViewModel
     {
         public CalculatorConfigurationViewModel Configuration { get; private set; }
 
-        public ObservableCollection<LogMessageViewModel> OutputLog { get; private set; }
+        public ObservableCollection<CalculatorLogViewModel> OutputLog { get; private set; }
         public ObservableCollection<string> StatementLog { get; private set; }
 
         private int _statementCursor;
@@ -18,7 +18,7 @@ namespace SimpleCalculator.ViewModel
         public MainViewModel()
         {
             this.Configuration = new CalculatorConfigurationViewModel();
-            this.OutputLog = new ObservableCollection<LogMessageViewModel>();
+            this.OutputLog = new ObservableCollection<CalculatorLogViewModel>();
             this.StatementLog = new ObservableCollection<string>();
 
             _statementCursor = -1;
@@ -105,13 +105,12 @@ namespace SimpleCalculator.ViewModel
                 });
             }
         }
-        public void AddCodeLine(string line, bool isError = false, bool isAnswer = false)
+        public void AddCodeLine(string line, CalculatorLogType type)
         {
-            this.OutputLog.Add(new LogMessageViewModel()
+            this.OutputLog.Add(new CalculatorLogViewModel()
             {
-                IsError = isError,
                 Message = line,
-                IsAnswer = isAnswer
+                Type = type
             });
         }
     }

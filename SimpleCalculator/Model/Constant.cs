@@ -1,5 +1,4 @@
-﻿using SimpleCalculator.Component;
-using SimpleCalculator.Model.Interface;
+﻿using SimpleCalculator.Model.Interface;
 
 namespace SimpleCalculator.Model
 {

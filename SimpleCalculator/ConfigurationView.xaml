@@ -17,7 +17,7 @@
         <TabControl>
             <TabItem Header="Theme">
                 
-                <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto" ColumnDefinitions="Auto, *">
+                <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto" ColumnDefinitions="Auto, *">
 
                     <TextBlock Text="Primary Foreground" />
                     <TextBlock Grid.Row="1" Text="Primary Background" />
@@ -25,8 +25,10 @@
                     <TextBlock Grid.Row="3" Text="Secondary Foreground" />
                     <TextBlock Grid.Row="4" Text="Code Foreground" />
                     <TextBlock Grid.Row="5" Text="Code Error Foreground" />
-                    <TextBlock Grid.Row="6" Text="Title Foreground" />
-                    <TextBlock Grid.Row="7" Text="Title Background" />
+                    <TextBlock Grid.Row="6" Text="Code Terminal Foreground" />
+                    <TextBlock Grid.Row="7" Text="Code Terminal Font Size" />                    
+                    <TextBlock Grid.Row="8" Text="Title Foreground" />
+                    <TextBlock Grid.Row="9" Text="Title Background" />
 
                     <xceed:ColorPicker Grid.Column="1" SelectedColor="{Binding Theme.PrimaryForegroundColor, Mode=TwoWay, Converter={StaticResource SolidColorBrushColorConverter}}" />
                     <xceed:ColorPicker Grid.Column="1" Grid.Row="1" SelectedColor="{Binding Theme.PrimaryBackgroundColor, Mode=TwoWay, Converter={StaticResource SolidColorBrushColorConverter}}" />
@@ -34,8 +36,10 @@
                     <xceed:ColorPicker Grid.Column="1" Grid.Row="3" SelectedColor="{Binding Theme.SecondaryForegroundColor, Mode=TwoWay, Converter={StaticResource SolidColorBrushColorConverter}}" />
                     <xceed:ColorPicker Grid.Column="1" Grid.Row="4" SelectedColor="{Binding Theme.CodeForegroundColor, Mode=TwoWay, Converter={StaticResource SolidColorBrushColorConverter}}" />
                     <xceed:ColorPicker Grid.Column="1" Grid.Row="5" SelectedColor="{Binding Theme.CodeErrorForegroundColor, Mode=TwoWay, Converter={StaticResource SolidColorBrushColorConverter}}" />
-                    <xceed:ColorPicker Grid.Column="1" Grid.Row="6" SelectedColor="{Binding Theme.TitleForegroundColor, Mode=TwoWay, Converter={StaticResource SolidColorBrushColorConverter}}" />
-                    <xceed:ColorPicker Grid.Column="1" Grid.Row="7" SelectedColor="{Binding Theme.TitleBackgroundColor, Mode=TwoWay, Converter={StaticResource SolidColorBrushColorConverter}}" />
+                    <xceed:ColorPicker Grid.Column="1" Grid.Row="6" SelectedColor="{Binding Theme.TerminalForegroundColor, Mode=TwoWay, Converter={StaticResource SolidColorBrushColorConverter}}" />
+                    <xceed:DoubleUpDown Grid.Column="1" Grid.Row="7" Value="{Binding Theme.TerminalFontSize, Mode=TwoWay}" Minimum="10" Maximum="20" Margin="2, 0" />
+                    <xceed:ColorPicker Grid.Column="1" Grid.Row="8" SelectedColor="{Binding Theme.TitleForegroundColor, Mode=TwoWay, Converter={StaticResource SolidColorBrushColorConverter}}" />
+                    <xceed:ColorPicker Grid.Column="1" Grid.Row="9" SelectedColor="{Binding Theme.TitleBackgroundColor, Mode=TwoWay, Converter={StaticResource SolidColorBrushColorConverter}}" />
 
                 </Grid>
                 

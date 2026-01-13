@@ -12,6 +12,8 @@ namespace SimpleCalculator.ViewModel
         Brush _titleBackgroundColor;
         Brush _codeForegroundColor;
         Brush _codeErrorForegroundColor;
+        Brush _terminalForegroundColor;
+        double _terminalFontSize;
         Brush _primaryBackgroundColor;
         Brush _primaryForegroundColor;
         Brush _secondaryBackgroundColor;
@@ -36,6 +38,16 @@ namespace SimpleCalculator.ViewModel
         {
             get { return _codeErrorForegroundColor; }
             set { this.RaiseAndSetIfChanged(ref _codeErrorForegroundColor, value); }
+        }
+        public Brush TerminalForegroundColor
+        {
+            get { return _terminalForegroundColor; }
+            set { this.RaiseAndSetIfChanged(ref _terminalForegroundColor, value); }
+        }
+        public double TerminalFontSize
+        {
+            get { return _terminalFontSize; }
+            set { this.RaiseAndSetIfChanged(ref _terminalFontSize, value); }
         }
         public Brush PrimaryBackgroundColor
         {
@@ -64,6 +76,8 @@ namespace SimpleCalculator.ViewModel
             this.TitleForegroundColor = Brushes.Black;
             this.CodeForegroundColor = Brushes.Black;
             this.CodeErrorForegroundColor = Brushes.Red;
+            this.TerminalForegroundColor = Brushes.CadetBlue;
+            this.TerminalFontSize = 14;
             this.PrimaryBackgroundColor = Brushes.White;
             this.PrimaryForegroundColor = Brushes.Black;
             this.SecondaryBackgroundColor = Brushes.White;
@@ -85,6 +99,8 @@ namespace SimpleCalculator.ViewModel
             this.SecondaryForegroundColor = new SolidColorBrush(theme.SecondaryForegroundColor);
             this.CodeForegroundColor = new SolidColorBrush(theme.CodeForegroundColor);
             this.CodeErrorForegroundColor = new SolidColorBrush(theme.CodeErrorForegroundColor);
+            this.TerminalForegroundColor = new SolidColorBrush(theme.TerminalForegroundColor);
+            this.TerminalFontSize = theme.TerminalFontSize;
         }
     }
 }
