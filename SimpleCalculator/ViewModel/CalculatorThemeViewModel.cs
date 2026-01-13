@@ -15,6 +15,7 @@ namespace SimpleCalculator.ViewModel
         Brush _primaryBackgroundColor;
         Brush _primaryForegroundColor;
         Brush _secondaryBackgroundColor;
+        Brush _secondaryForegroundColor;
 
         public Brush TitleForegroundColor
         {
@@ -51,6 +52,11 @@ namespace SimpleCalculator.ViewModel
             get { return _secondaryBackgroundColor; }
             set { this.RaiseAndSetIfChanged(ref _secondaryBackgroundColor, value); }
         }
+        public Brush SecondaryForegroundColor
+        {
+            get { return _secondaryForegroundColor; }
+            set { this.RaiseAndSetIfChanged(ref _secondaryForegroundColor, value); }
+        }
 
         public CalculatorThemeViewModel()
         {
@@ -61,6 +67,7 @@ namespace SimpleCalculator.ViewModel
             this.PrimaryBackgroundColor = Brushes.White;
             this.PrimaryForegroundColor = Brushes.Black;
             this.SecondaryBackgroundColor = Brushes.White;
+            this.SecondaryForegroundColor = Brushes.Black;
         }
 
         public CalculatorThemeViewModel(CalculatorTheme theme)
@@ -75,7 +82,8 @@ namespace SimpleCalculator.ViewModel
             this.PrimaryBackgroundColor = new SolidColorBrush(theme.PrimaryBackgroundColor);
             this.PrimaryForegroundColor = new SolidColorBrush(theme.PrimaryForegroundColor);
             this.SecondaryBackgroundColor = new SolidColorBrush(theme.SecondaryBackgroundColor);
-            this.CodeErrorForegroundColor = new SolidColorBrush(theme.CodeForegroundColor);
+            this.SecondaryForegroundColor = new SolidColorBrush(theme.SecondaryForegroundColor);
+            this.CodeForegroundColor = new SolidColorBrush(theme.CodeForegroundColor);
             this.CodeErrorForegroundColor = new SolidColorBrush(theme.CodeErrorForegroundColor);
         }
     }

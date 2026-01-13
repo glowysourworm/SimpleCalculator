@@ -11,16 +11,18 @@ namespace SimpleCalculator.Model
         public Color PrimaryBackgroundColor { get; set; }
         public Color PrimaryForegroundColor { get; set; }
         public Color SecondaryBackgroundColor { get; set; }
+        public Color SecondaryForegroundColor { get; set; }
 
         public CalculatorTheme()
         {
             this.TitleForegroundColor = Color.FromArgb(0xFF, 0x88, 0x88, 0x88);
             this.TitleBackgroundColor = Color.FromArgb(0xFF, 0xCC, 0xCC, 0xCC);
-            this.CodeForegroundColor = Color.FromArgb(0xFF, 0x88, 0x88, 0x88);
+            this.CodeForegroundColor = Color.FromArgb(0xFF, 0x55, 0x55, 0x55);
             this.CodeErrorForegroundColor = Colors.Red;
             this.PrimaryBackgroundColor = Colors.White;
             this.PrimaryForegroundColor = Color.FromArgb(0xFF, 0x55, 0x55, 0x55);
-            this.SecondaryBackgroundColor = Color.FromArgb(0xFF, 0xEE, 0xEE, 0xEE);
+            this.SecondaryBackgroundColor = Colors.White;
+            this.SecondaryForegroundColor = Color.FromArgb(0xFF, 0x33, 0x33, 0x33);
         }
     }
 }

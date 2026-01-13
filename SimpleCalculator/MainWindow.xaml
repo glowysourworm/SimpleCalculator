@@ -5,24 +5,45 @@
         FontFamily="Consolas"
         WindowStartupLocation="CenterScreen"
         Title="Simple Calculator"
-        Foreground="{Binding Theme.PrimaryForegroundColor}"
-        Background="{Binding Theme.PrimaryBackgroundColor}">
+        Icon="/Resources/Images/icon.png"
+        Foreground="{Binding Configuration.Theme.PrimaryForegroundColor}"
+        Background="{Binding Configuration.Theme.PrimaryBackgroundColor}">
 
     <Window.Resources>
         
         <!-- Theme -->
         <Style x:Key="CodeTextBlockStyle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{Binding Theme.CodeForegroundColor}" />
+            
+            <Setter Property="Foreground" Value="{Binding DataContext.Configuration.Theme.CodeForegroundColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
 
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsError}" Value="True">
-                    <Setter Property="Foreground" Value="{Binding Theme.CodeErrorForegroundColor}" />
+                    <Setter Property="Foreground" Value="{Binding DataContext.Configuration.Theme.CodeErrorForegroundColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
                 </DataTrigger>
             </Style.Triggers>
 
         </Style>
 
+        <Style x:Key="CodeTextBoxStyle" TargetType="TextBox">
+
+            <Setter Property="Foreground" Value="{Binding DataContext.Configuration.Theme.CodeForegroundColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
+            <Setter Property="Background" Value="{Binding DataContext.Configuration.Theme.PrimaryBackgroundColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsError}" Value="True">
+                    <Setter Property="Foreground" Value="{Binding DataContext.Configuration.Theme.CodeErrorForegroundColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
+                </DataTrigger>
+            </Style.Triggers>
+
+        </Style>
+
+        <Style x:Key="LabelTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{Binding DataContext.Configuration.Theme.SecondaryForegroundColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
+            <Setter Property="Margin" Value="1" />
+        </Style>
+
         <Style x:Key="NoSelectItemContainerStyle" TargetType="ListViewItem">
+            
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListViewItem">
@@ -36,27 +57,40 @@
 
     </Window.Resources>
     
-    <Grid>
+    <Grid Background="Transparent">
+        
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="32" />
         </Grid.RowDefinitions>
+        
+        <!-- Menu -->
+        <Menu Background="{Binding DataContext.Configuration.Theme.SecondaryBackgroundColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}">
+            <MenuItem x:Name="ConfigurationMI" Header="_Configuration" Click="ConfigurationMI_Click" />
+            <MenuItem x:Name="AboutMI" Header="_About" Click="AboutMI_Click" />
+        </Menu>
 
         <!-- Primary Notepad -->
         <ListView x:Name="NotepadLV"                  
+                  Grid.Row="1"
                   IsTabStop="False"
+                  Background="Transparent"
                   ItemsSource="{Binding OutputLog}"
                   ItemContainerStyle="{StaticResource NoSelectItemContainerStyle}">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel Orientation="Horizontal" Margin="2" Background="{Binding Background}">
-                        <TextBlock Text="> " Visibility="{Binding IsAnswer, Converter={StaticResource BoolInverseVisibilityCollapseConverter}}" />
+                    <StackPanel Orientation="Horizontal" Margin="2">
+                        <TextBlock Text="> " 
+                                   Style="{StaticResource CodeTextBlockStyle}"
+                                   Visibility="{Binding IsAnswer, Converter={StaticResource BoolInverseVisibilityCollapseConverter}}" />
                         <TextBox Text="{Binding Message}" 
+                                 Style="{StaticResource CodeTextBoxStyle}"
                                  IsReadOnly="True" 
                                  IsTabStop="False"
                                  BorderThickness="0">
@@ -67,7 +101,7 @@
         </ListView>
 
         <!-- Primary Input -->
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="32" />
                 <ColumnDefinition Width="*" />
@@ -78,18 +112,21 @@
 
         <!-- Sidebar -->
         <Grid RowDefinitions="Auto, *, Auto, *, Auto, *" 
+              Background="{Binding Configuration.Theme.SecondaryBackgroundColor}"
               MinWidth="300"
               Grid.Column="1" 
               Grid.RowSpan="3">
 
-            <TextBlock Text="Constants" />
+            <TextBlock Text="Constants" Style="{StaticResource LabelTextBlockStyle}" />
 
             <ListView x:Name="ConstantsLV" 
                       Grid.Row="1"
                       IsTabStop="False"
                       Focusable="False"                      
+                      Foreground="{Binding Configuration.Theme.SecondaryForegroundColor}"
+                      Background="{Binding Configuration.Theme.SecondaryBackgroundColor}"
                       ItemContainerStyle="{StaticResource NoSelectItemContainerStyle}"
-                      ItemsSource="{Binding Constants}">
+                      ItemsSource="{Binding Configuration.Constants}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Grid ColumnDefinitions="Auto, Auto, *">
@@ -101,14 +138,16 @@
                 </ListView.ItemTemplate>
             </ListView>
 
-            <TextBlock Text="Variables" Grid.Row="2" />
+            <TextBlock Text="Variables" Grid.Row="2" Style="{StaticResource LabelTextBlockStyle}" />
 
             <ListView x:Name="VariablesLV" 
                       Grid.Row="3"
                       IsTabStop="False"
                       Focusable="False"                      
+                      Foreground="{Binding Configuration.Theme.SecondaryForegroundColor}"
+                      Background="{Binding Configuration.Theme.SecondaryBackgroundColor}"
                       ItemContainerStyle="{StaticResource NoSelectItemContainerStyle}"
-                      ItemsSource="{Binding Variables}">
+                      ItemsSource="{Binding Configuration.Variables}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Grid ColumnDefinitions="Auto, Auto, *">
@@ -120,14 +159,16 @@
                 </ListView.ItemTemplate>
             </ListView>
 
-            <TextBlock Text="Functions" Grid.Row="4" />
+            <TextBlock Text="Functions" Grid.Row="4" Style="{StaticResource LabelTextBlockStyle}" />
 
             <ListView x:Name="FunctionsLV" 
                       Grid.Row="5"
                       IsTabStop="False"
                       Focusable="False"
+                      Foreground="{Binding Configuration.Theme.SecondaryForegroundColor}"
+                      Background="{Binding Configuration.Theme.SecondaryBackgroundColor}"
                       ItemContainerStyle="{StaticResource NoSelectItemContainerStyle}"
-                      ItemsSource="{Binding Functions}">
+                      ItemsSource="{Binding Configuration.Functions}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Expression}" />

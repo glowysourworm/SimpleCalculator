@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 
 using SimpleCalculator.Component;
 using SimpleCalculator.Component.Interface;
@@ -24,7 +25,7 @@ namespace SimpleCalculator
             _calculator = new CalculatorCore(_configuration, _logger, new ExpressionParser(_configuration, _logger), new ExpressionFormatter(_configuration));
 
             // Theme
-            _viewModel.Theme.Update(_configuration.Theme);
+            _viewModel.Configuration.Theme.Update(_configuration.Theme);
 
             // Theme -> Style Bindings
             InitializeComponent();
@@ -139,6 +140,26 @@ namespace SimpleCalculator
 
             else
                 return "= " + number.ToString();
+        }
+
+        private void ConfigurationMI_Click(object sender, RoutedEventArgs e)
+        {
+            var window = new Window();
+
+            window.Content = new ConfigurationView();
+            window.DataContext = _viewModel.Configuration;
+
+            var decoder = PngBitmapDecoder.Create(new Uri("pack://application:,,,/Resources/Images/settings.png"), BitmapCreateOptions.None, BitmapCacheOption.Default);
+            window.Icon = decoder.Frames[0];
+            window.Title = "Configuration";
+            window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            window.SizeToContent = SizeToContent.WidthAndHeight;
+            window.Show();
+        }
+
+        private void AboutMI_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

@@ -8,18 +8,7 @@ namespace SimpleCalculator.ViewModel
 {
     public class MainViewModel : ViewModelBase
     {
-        CalculatorThemeViewModel _theme;
-
-        public CalculatorThemeViewModel Theme
-        {
-            get { return _theme; }
-            set { this.RaiseAndSetIfChanged(ref _theme, value); }
-        }
-
-        public ObservableCollection<ConstantViewModel> Constants { get; private set; }
-        public ObservableCollection<VariableViewModel> Variables { get; private set; }
-        public ObservableCollection<FunctionViewModel> Functions { get; private set; }
-        public ObservableCollection<OperatorViewModel> Operators { get; private set; }
+        public CalculatorConfigurationViewModel Configuration { get; private set; }
 
         public ObservableCollection<LogMessageViewModel> OutputLog { get; private set; }
         public ObservableCollection<string> StatementLog { get; private set; }
@@ -28,11 +17,7 @@ namespace SimpleCalculator.ViewModel
 
         public MainViewModel()
         {
-            this.Theme = new CalculatorThemeViewModel();
-            this.Constants = new ObservableCollection<ConstantViewModel>();
-            this.Variables = new ObservableCollection<VariableViewModel>();
-            this.Functions = new ObservableCollection<FunctionViewModel>();
-            this.Operators = new ObservableCollection<OperatorViewModel>();
+            this.Configuration = new CalculatorConfigurationViewModel();
             this.OutputLog = new ObservableCollection<LogMessageViewModel>();
             this.StatementLog = new ObservableCollection<string>();
 
@@ -79,14 +64,14 @@ namespace SimpleCalculator.ViewModel
 
         public void UpdateSymbols(SymbolTable table)
         {
-            this.Operators.Clear();
-            this.Constants.Clear();
-            this.Variables.Clear();
-            this.Functions.Clear();
+            this.Configuration.Operators.Clear();
+            this.Configuration.Constants.Clear();
+            this.Configuration.Variables.Clear();
+            this.Configuration.Functions.Clear();
 
             foreach (var ioperator in table.Operators)
             {
-                this.Operators.Add(new OperatorViewModel()
+                this.Configuration.Operators.Add(new OperatorViewModel()
                 {
                     Type = ioperator.Type,
                     Order = ioperator.Order,
@@ -96,7 +81,7 @@ namespace SimpleCalculator.ViewModel
 
             foreach (var constant in table.Constants)
             {
-                this.Constants.Add(new ConstantViewModel()
+                this.Configuration.Constants.Add(new ConstantViewModel()
                 {
                     Symbol = constant.Symbol,
                     Value = table.GetValue(constant)
@@ -105,7 +90,7 @@ namespace SimpleCalculator.ViewModel
 
             foreach (var variable in table.Variables)
             {
-                this.Variables.Add(new VariableViewModel()
+                this.Configuration.Variables.Add(new VariableViewModel()
                 {
                     Symbol = variable.Symbol,
                     Value = table.GetValue(variable)
@@ -114,7 +99,7 @@ namespace SimpleCalculator.ViewModel
 
             foreach (var function in table.Functions)
             {
-                this.Functions.Add(new FunctionViewModel()
+                this.Configuration.Functions.Add(new FunctionViewModel()
                 {
                     Expression = function.ToString()
                 });

@@ -9,9 +9,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Images\icon.png" />
+    <None Remove="Resources\Images\settings.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Extended.Wpf.Toolkit" Version="5.0.0" />
     <PackageReference Include="SimpleWpf" Version="0.0.1" />
     <PackageReference Include="SimpleWpf.UI" Version="0.0.1" />
     <PackageReference Include="SimpleWpf.Utilities" Version="0.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Images\icon.png" />
+    <Resource Include="Resources\Images\settings.png" />
   </ItemGroup>
 
 </Project>
